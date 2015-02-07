@@ -11,13 +11,10 @@ import javax.swing.JMenuItem;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class CategoryViewerMenu extends JPanel {
+public class MainMenu extends JPanel {
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * Create the panel.
-	 */
-	public CategoryViewerMenu() {
+	
+	public MainMenu() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0};
 		gridBagLayout.rowHeights = new int[]{0, 0};

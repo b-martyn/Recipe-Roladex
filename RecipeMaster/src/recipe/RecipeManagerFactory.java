@@ -7,6 +7,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
@@ -39,8 +40,13 @@ public class RecipeManagerFactory {
 
 
 class RecipeManagerImpl implements RecipeManager{
+	
+	private final String workingDirectory = System.getProperty("user.home");
+	private final String resourceDirectory = "RecipeRoladex/resources";
+	/*
 	private final String workingDirectory = System.getProperty("user.dir");
 	private final String resourceDirectory = "src/resources";
+	*/
 	private final Path recipeDirectory = Paths.get(workingDirectory, resourceDirectory, "recipes");
 	
 	private static final String DELIMITER = ":";
@@ -64,6 +70,14 @@ class RecipeManagerImpl implements RecipeManager{
 				}
 				recipes.put(category, recipeCategory);
 			}
+		} catch (NoSuchFileException e){
+			try {
+				Files.createDirectories(recipeDirectory);
+				return getRecipes();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} catch (IOException e){
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -74,8 +88,6 @@ class RecipeManagerImpl implements RecipeManager{
 
 	@Override
 	public void addRecipe(Recipe recipe) {
-		//TODO add category to new recipe
-		System.out.println(recipe.getCategory());
 		try(BufferedWriter bw = Files.newBufferedWriter(Paths.get(recipeDirectory.toString(), recipe.getCategory(), recipe.getName() + RECIPE_FILENAME_SUFFIX + RECIPE_FILE_EXTENSION), CREATE, TRUNCATE_EXISTING)){
 			
 			bw.write(recipe.getName() + "\n");

@@ -1,7 +1,6 @@
 package recipe;
 
 import javax.swing.JDialog;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
@@ -9,8 +8,7 @@ import javax.swing.JTabbedPane;
 import java.awt.Component;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -22,172 +20,191 @@ public class RecipeViewer extends JPanel {
 	
 	private JTabbedPane tabbedPane;
 	private Map<String, Collection<Recipe>> recipes;
+	private RecipeManager recipeManager;
 	
-	public RecipeViewer(Map<String, Collection<Recipe>> recipes) {
+	public RecipeViewer(Map<String, Collection<Recipe>> recipes, RecipeManager recipeManager) {
 		this.recipes = recipes;
+		this.recipeManager = recipeManager;
 		initialize();
 	}
 	
 	private void initialize(){
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0};
-		gridBagLayout.rowHeights = new int[]{0, 0};
+		gridBagLayout.rowHeights = new int[]{0, 0, 0};
 		gridBagLayout.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{1.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
 		setLayout(gridBagLayout);
+		
+		JPanel controlPanel = new MainMenu();
+		GridBagConstraints gbc_contolPanel = new GridBagConstraints();
+		gbc_contolPanel.insets = new Insets(0, 0, 5, 0);
+		gbc_contolPanel.fill = GridBagConstraints.BOTH;
+		gbc_contolPanel.gridx = 0;
+		gbc_contolPanel.gridy = 0;
+		controlPanel.addPropertyChangeListener("Edit", new PropertyChangeListener(){
+			@Override
+			public void propertyChange(PropertyChangeEvent pce) {
+				editRecipe(getSelectedCategoryViewer());
+			}
+		});
+		controlPanel.addPropertyChangeListener("New", new PropertyChangeListener(){
+			@Override
+			public void propertyChange(PropertyChangeEvent pce) {
+				newRecipe();
+			}
+		});
+		controlPanel.addPropertyChangeListener("Move", new PropertyChangeListener(){
+			@Override
+			public void propertyChange(PropertyChangeEvent pce) {
+				moveRecipe((Component)pce.getNewValue(), getSelectedCategoryViewer());
+			}
+		});
+		controlPanel.addPropertyChangeListener("Delete", new PropertyChangeListener(){
+			@Override
+			public void propertyChange(PropertyChangeEvent pce) {
+				deleteRecipe(getSelectedCategoryViewer());
+			}
+		});
+		add(controlPanel, gbc_contolPanel);
 		
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
 		gbc_tabbedPane.fill = GridBagConstraints.BOTH;
 		gbc_tabbedPane.gridx = 0;
-		gbc_tabbedPane.gridy = 0;
+		gbc_tabbedPane.gridy = 1;
 		add(tabbedPane, gbc_tabbedPane);
 		
-		for(String category : recipes.keySet()){
-			CategoryViewer categoryPanel = new CategoryViewer(category, recipes.get(category));
-			categoryPanel.addPropertyChangeListener("Move", new MovePropertyChangeListener(categoryPanel));
-			categoryPanel.addPropertyChangeListener("New", new NewRecipePropertyChangeListener(categoryPanel));
-			categoryPanel.addPropertyChangeListener("Edit", new EditRecipePropertyChangeListener(categoryPanel));
-			categoryPanel.addPropertyChangeListener("Delete", new DeleteRecipePropertyChangeListener(categoryPanel));
-			tabbedPane.addTab(category, categoryPanel);
-		}
-	}
-	
-	private class MovePropertyChangeListener implements PropertyChangeListener{
-		
-		private CategoryViewer categoryViewer;
-		
-		MovePropertyChangeListener(CategoryViewer categoryViewer){
-			this.categoryViewer = categoryViewer;
-		}
-		
-		@Override
-		public void propertyChange(PropertyChangeEvent pce) {
-			JPopupMenu categoryList = new JPopupMenu();
+		if(recipes.isEmpty()){
+			tabbedPane.addTab("Welcome", new WelcomeScreen());
+		}else{
 			for(String category : recipes.keySet()){
-				if(!category.equals(categoryViewer.getCategory())){
-					JMenuItem menuItem = new JMenuItem(category);
-					menuItem.addActionListener(new ActionListener(){
-						@Override
-						public void actionPerformed(ActionEvent arg0) {
-							firePropertyChange("recipemove", menuItem.getText(), categoryViewer.getList().getSelected());
-							for(Component component : tabbedPane.getComponents()){
-								if(((CategoryViewer)component).getCategory().equals(menuItem.getText())){
-									((CategoryViewer)component).getRecipes().add(categoryViewer.getList().getSelected());
-									((CategoryViewer)component).getList().loadListModel();
-									break;
-								}
-							}
-							categoryViewer.getRecipes().remove(categoryViewer.getList().getSelected());
-							categoryViewer.getList().loadListModel();
-						}
-					});
-					categoryList.add(menuItem);
-				}
+				CategoryViewer categoryPanel = new CategoryViewer(category, recipes.get(category));
+				tabbedPane.addTab(category, categoryPanel);
 			}
-			categoryList.addSeparator();
-			JMenuItem newCategory = new JMenuItem("New");
-			newCategory.addActionListener(new ActionListener(){
+		}
+	}
+	
+	public CategoryViewer getSelectedCategoryViewer(){
+		return (CategoryViewer)tabbedPane.getComponent(tabbedPane.getSelectedIndex());
+	}
+	
+	public JTabbedPane getTabbedPane(){
+		return tabbedPane;
+	}
+	
+	private void moveRecipe(Component initiator, CategoryViewer categoryViewer){
+		if(categoryViewer.getList().getSelected() != null){
+			JPopupMenu categoryList = new CategoryList(recipes.keySet());
+			categoryList.show(initiator, 0, initiator.getHeight());
+			categoryList.addPropertyChangeListener("categoryselected", new PropertyChangeListener(){
 				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					NewCategory newCategoryDialog = new NewCategory();
-					newCategoryDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-					newCategoryDialog.setVisible(true);
-					newCategoryDialog.addPropertyChangeListener("newcategory", new NewCategoryPropertyChangeListener(categoryViewer));
-				}
-			});
-			categoryList.add(newCategory);
-			categoryList.show((Component)pce.getOldValue(), 0, ((Component)pce.getOldValue()).getHeight());
-		}
-	}
-	
-	private class NewRecipePropertyChangeListener implements PropertyChangeListener{
-		
-		private CategoryViewer categoryViewer;
-		
-		NewRecipePropertyChangeListener(CategoryViewer categoryViewer){
-			this.categoryViewer = categoryViewer;
-		}
-		
-		@Override
-		public void propertyChange(PropertyChangeEvent pce) {
-			recipes.get(categoryViewer.getCategory()).add((Recipe)pce.getNewValue());
-			categoryViewer.getList().loadListModel();
-			firePropertyChange("New", pce.getOldValue(), pce.getNewValue());
-		}
-		
-	}
-	
-	private class EditRecipePropertyChangeListener implements PropertyChangeListener{
-		
-		@SuppressWarnings("unused")
-		private CategoryViewer categoryViewer;
-		
-		EditRecipePropertyChangeListener(CategoryViewer categoryViewer){
-			this.categoryViewer = categoryViewer;
-		}
-		
-		@Override
-		public void propertyChange(PropertyChangeEvent pce) {
-			firePropertyChange("Edit", pce.getOldValue(), pce.getNewValue());
-		}
-		
-	}
-	
-	private class NewCategoryPropertyChangeListener implements PropertyChangeListener{
-		
-		private CategoryViewer categoryViewer;
-		
-		NewCategoryPropertyChangeListener(CategoryViewer categoryViewer){
-			this.categoryViewer = categoryViewer;
-		}
-		
-		@Override
-		public void propertyChange(PropertyChangeEvent pce) {
-			Collection<Recipe> newRecipeList = null;
-			CategoryViewer newTab = null;
-			if(recipes.containsKey((String)pce.getNewValue())){
-				System.out.println(recipes.containsValue(categoryViewer.getList().getSelected()));
-				newRecipeList = recipes.get((String)pce.getNewValue());
-				newRecipeList.add(categoryViewer.getList().getSelected());
-				for(Component component : tabbedPane.getComponents()){
-					if(((CategoryViewer)component).getCategory().equals((String)pce.getNewValue())){
-						((CategoryViewer)component).getRecipes().add(categoryViewer.getList().getSelected());
-						((CategoryViewer)component).getList().loadListModel();
+				public void propertyChange(PropertyChangeEvent pce) {
+					recipes.get(categoryViewer.getCategory()).remove(categoryViewer.getList().getSelected());
+					recipeManager.deleteRecipe(categoryViewer.getList().getSelected());
+					categoryViewer.getList().getSelected().setCategory((String)pce.getNewValue());
+					recipes.get((String)pce.getNewValue()).add(categoryViewer.getList().getSelected());
+					recipeManager.addRecipe(categoryViewer.getList().getSelected());
+					categoryViewer.getList().loadListModel();
+					for(Component component : tabbedPane.getComponents()){
+						if(((CategoryViewer)component).getCategory().equals((String)pce.getNewValue())){
+							((CategoryViewer)component).getList().loadListModel();
+							break;
+						}
 					}
 				}
-				firePropertyChange("recipemove", pce.getNewValue(), categoryViewer.getList().getSelected());
-			}else{
-				newRecipeList = new ArrayList<>();
-				newRecipeList.add(categoryViewer.getList().getSelected());
-				recipes.put((String)pce.getNewValue(), newRecipeList);
-				newTab = new CategoryViewer((String)pce.getNewValue(), newRecipeList);
-				newTab.addPropertyChangeListener("Move", new MovePropertyChangeListener(newTab));
-				newTab.addPropertyChangeListener("New", new NewRecipePropertyChangeListener(newTab));
-				newTab.addPropertyChangeListener("Edit", new EditRecipePropertyChangeListener(newTab));
-				newTab.addPropertyChangeListener("Delete", new DeleteRecipePropertyChangeListener(newTab));
-				tabbedPane.addTab((String)pce.getNewValue(), newTab);
-				firePropertyChange("newcategory", this, pce.getNewValue());
-			}
-			categoryViewer.getRecipes().remove(categoryViewer.getList().getSelected());
-			categoryViewer.getList().loadListModel();
+			});
+			categoryList.addPropertyChangeListener("newcategory", new PropertyChangeListener(){
+				@Override
+				public void propertyChange(PropertyChangeEvent pce) {
+					recipeManager.deleteRecipe(categoryViewer.getList().getSelected());
+					recipes.get(categoryViewer.getCategory()).remove(categoryViewer.getList().getSelected());
+					categoryViewer.getList().getSelected().setCategory((String)pce.getNewValue());
+					if(recipes.containsKey((String)pce.getNewValue())){
+						recipes.get((String)pce.getNewValue()).add(categoryViewer.getList().getSelected());
+						for(Component component : tabbedPane.getComponents()){
+							if(((CategoryViewer)component).getCategory().equals((String)pce.getNewValue())){
+								((CategoryViewer)component).getList().loadListModel();
+							}
+						}
+					}else{
+						Collection<Recipe> newRecipeList = new ArrayList<>();
+						newRecipeList.add(categoryViewer.getList().getSelected());
+						recipes.put((String)pce.getNewValue(), newRecipeList);
+						tabbedPane.addTab((String)pce.getNewValue(), new CategoryViewer((String)pce.getNewValue(), newRecipeList));
+						recipeManager.newCategory((String)pce.getNewValue());
+					}
+					recipeManager.addRecipe(categoryViewer.getList().getSelected());
+					categoryViewer.getList().loadListModel();
+				}
+			});
 		}
 	}
 	
-	private class DeleteRecipePropertyChangeListener implements PropertyChangeListener{
-		
-		private CategoryViewer categoryViewer;
-		
-		DeleteRecipePropertyChangeListener(CategoryViewer categoryViewer){
-			this.categoryViewer = categoryViewer;
+	private void newRecipe(){
+		RecipeEditor dialog = new RecipeEditor(recipes.keySet());
+		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		dialog.setVisible(true);
+		dialog.addPropertyChangeListener("newrecipe", new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent pce) {
+				recipes.get(((Recipe)pce.getNewValue()).getCategory()).add((Recipe)pce.getNewValue());
+				reloadTabs();
+				recipeManager.addRecipe((Recipe)pce.getNewValue());
+			}
+		});
+		dialog.addPropertyChangeListener("newcategory", new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent pce) {
+				recipeManager.newCategory((String)pce.getNewValue());
+				recipes.put((String)pce.getNewValue(), new ArrayList<Recipe>());
+				tabbedPane.add((String)pce.getNewValue(), new CategoryViewer((String)pce.getNewValue(), recipes.get((String)pce.getNewValue())));
+			}
+		});
+	}
+	
+	private void editRecipe (CategoryViewer categoryViewer){
+		if(categoryViewer.getList().getSelected() != null){
+			RecipeEditor dialog = new RecipeEditor(recipes.keySet(), categoryViewer.getList().getSelected());
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
+			dialog.addPropertyChangeListener("editrecipe", new PropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent pce) {
+					if(categoryViewer.getCategory().equals(((Recipe)pce.getNewValue()).getCategory())){
+						recipeManager.addRecipe((Recipe)pce.getNewValue());
+					}else{
+						String category = ((Recipe)pce.getNewValue()).getCategory();
+						((Recipe)pce.getNewValue()).setCategory(categoryViewer.getCategory());
+						recipeManager.deleteRecipe((Recipe)pce.getNewValue());
+						recipes.get(categoryViewer.getCategory()).remove((Recipe)pce.getNewValue());
+						((Recipe)pce.getNewValue()).setCategory(category);
+						recipes.get(category).add((Recipe)pce.getNewValue());
+						recipeManager.addRecipe((Recipe)pce.getNewValue());
+					}
+					reloadTabs();
+				}
+			});
+			dialog.addPropertyChangeListener("newcategory", new PropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent pce) {
+					recipeManager.newCategory((String)pce.getNewValue());
+					recipes.put((String)pce.getNewValue(), new ArrayList<Recipe>());
+					tabbedPane.add((String)pce.getNewValue(), new CategoryViewer((String)pce.getNewValue(), recipes.get((String)pce.getNewValue())));
+				}
+			});
 		}
-		
-		@Override
-		public void propertyChange(PropertyChangeEvent pce) {
+	}
+	
+	private void deleteRecipe(CategoryViewer categoryViewer){
+		if(categoryViewer.getList().getSelected() != null){
 			categoryViewer.getRecipes().remove(categoryViewer.getList().getSelected());
 			categoryViewer.getList().loadListModel();
-			firePropertyChange("Delete", pce.getOldValue(), pce.getNewValue());
+			recipeManager.deleteRecipe(categoryViewer.getList().getSelected());
 		}
-		
+	}
+	
+	private void reloadTabs(){
+		for(Component component : tabbedPane.getComponents()){
+			if(component instanceof CategoryViewer){
+				((CategoryViewer)component).getList().loadListModel();
+			}
+		}
 	}
 }

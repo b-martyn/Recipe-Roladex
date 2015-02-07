@@ -23,6 +23,10 @@ public class NewCategory extends JDialog {
 	private JTextField textField;
 	
 	public NewCategory() {
+		initialize();
+	}
+	
+	private void initialize(){
 		setTitle("New Category");
 		setBounds(100, 100, 257, 107);
 		getContentPane().setLayout(new BorderLayout());
