@@ -10,8 +10,6 @@ public class MainWindow {
 
 	private JFrame frame;
 	
-	private RecipeManager recipeManager = RecipeManagerFactory.getRecipeManager();
-	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -40,7 +38,7 @@ public class MainWindow {
 		gridBagLayout.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 		frame.getContentPane().setLayout(gridBagLayout);
 		
-		RecipeViewer recipeView = new RecipeViewer(recipeManager.getRecipes(), recipeManager);
+		RecipeViewer recipeView = new RecipeViewer(new Recipes(RecipeManagerFactory.getRecipeManager()));
 		GridBagConstraints gbc_recipeView = new GridBagConstraints();
 		gbc_recipeView.fill = GridBagConstraints.BOTH;
 		gbc_recipeView.gridx = 0;

@@ -10,7 +10,7 @@ import java.util.Collection;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-public class CategoryViewer extends JPanel {
+public class CategoryViewer extends JPanel implements PropertyChangeListener{
 	private static final long serialVersionUID = 1L;
 
 	private Collection<Recipe> recipes;
@@ -35,11 +35,8 @@ public class CategoryViewer extends JPanel {
 		splitPane = new JSplitPane();
 		
 		list = new RecipeList(recipes);
-		list.addPropertyChangeListener("recipeSelected", new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent pce) {
-				splitPane.setRightComponent(new RecipeDetails((Recipe)pce.getNewValue()));
-			}
-		});
+		list.addPropertyChangeListener(this);
+		
 		splitPane.setLeftComponent(list);
 		splitPane.setRightComponent(new JPanel());
 		
@@ -61,5 +58,22 @@ public class CategoryViewer extends JPanel {
 	
 	public Collection<Recipe> getRecipes(){
 		return recipes;
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
+		switch(propertyChangeEvent.getPropertyName()){
+			case "selectedRecipeChange":
+				reloadDetails();
+				break;
+		}
+	}
+	
+	private void reloadDetails(){
+		if(list.getSelected() != null){
+			splitPane.setRightComponent(new RecipeDetails(list.getSelected()));
+		}else{
+			splitPane.setRightComponent(new JPanel());
+		}
 	}
 }

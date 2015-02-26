@@ -1,6 +1,6 @@
 package recipe;
 
-public class Instruction implements Comparable<Instruction>, RecipeComponent{
+public class Instruction implements Comparable<Instruction>, RecipeComponent, Cloneable{
 	private int stepNumber;
 	private String message;
 	
@@ -42,5 +42,13 @@ public class Instruction implements Comparable<Instruction>, RecipeComponent{
 		}else{
 			return 0;
 		}
+	}
+	
+	@Override
+	public Instruction clone(){
+		Instruction instruction = new Instruction();
+		instruction.stepNumber = stepNumber;
+		instruction.message = message;
+		return instruction;
 	}
 }

@@ -26,6 +26,10 @@ public class NewCategory extends JDialog {
 		initialize();
 	}
 	
+	public String getText(){
+		return textField.getText();
+	}
+	
 	private void initialize(){
 		setTitle("New Category");
 		setBounds(100, 100, 257, 107);

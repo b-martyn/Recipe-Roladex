@@ -1,7 +1,6 @@
 package recipe;
 
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
@@ -20,7 +19,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 
-public class RecipeList extends JPanel {
+public class RecipeList extends JPanel implements ListSelectionListener{
 	private static final long serialVersionUID = 1L;
 	
 	private Collection<Recipe> recipes;
@@ -49,16 +48,8 @@ public class RecipeList extends JPanel {
 		gbc_scrollPane.gridy = 0;
 		add(scrollPane, gbc_scrollPane);
 		
-		list = new JList<Recipe>();
-		loadListModel();
-		list.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent arg0) {
-				if(list.getSelectedValue() != null){
-					selectedRecipe = list.getSelectedValue();
-					firePropertyChange("recipeSelected", true, selectedRecipe);
-				}
-			}
-		});
+		list = new JList<Recipe>(recipes.toArray(new Recipe[recipes.size()]));
+		list.addListSelectionListener(this);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.setCellRenderer(new RecipeListRenderer());
 		scrollPane.setViewportView(list);
@@ -73,18 +64,25 @@ public class RecipeList extends JPanel {
 	}
 	
 	public void setSelected(Recipe recipe){
-		list.setSelectedValue(recipe, true);
-	}
-	
-	public void loadListModel(){
-		DefaultListModel<Recipe> recipeModel = new DefaultListModel<Recipe>();
-		for(Recipe recipe : recipes){
-			recipeModel.addElement(recipe);
+		if(recipes.contains(recipe)){
+			list.setSelectedValue(recipe, true);
+		}else{
+			throw new IllegalArgumentException("Recipe not found:\n" + recipe);
 		}
-		list.setModel(recipeModel);
 	}
 	
-	private class RecipeListRenderer implements ListCellRenderer<Recipe> {
+	public void reload(){
+		list.setListData(recipes.toArray(new Recipe[recipes.size()]));
+	}
+
+	@Override
+	public void valueChanged(ListSelectionEvent listSelectionEvent) {
+		Recipe oldValue = selectedRecipe;
+		selectedRecipe = list.getSelectedValue();
+		firePropertyChange("selectedRecipeChange", oldValue, selectedRecipe);
+	}
+	
+	public static class RecipeListRenderer implements ListCellRenderer<Recipe> {
 		
 		@Override
 		public Component getListCellRendererComponent(

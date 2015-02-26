@@ -2,19 +2,15 @@ package recipe;
 
 public class Measurement {
 	
-	private Measurement.Type type;
+	private String type;
 	private double amount;
 	
-	public Measurement(double amount, Measurement.Type type){
+	public Measurement(double amount, String type){
 		this.type = type;
 		this.amount = amount;
 	}
 	
-	public enum Type{
-		CUP, TABLESPOON, TEASPOON, DASH, OUNCES;
-	}
-	
-	public Measurement.Type getType(){
+	public String getType(){
 		return type;
 	}
 	

@@ -1,6 +1,6 @@
 package recipe;
 
-public class RecipeIngredient implements RecipeComponent{
+public class RecipeIngredient implements RecipeComponent, Cloneable{
 	private Ingredient ingredient;
 	private Measurement measurement;
 	
@@ -23,5 +23,10 @@ public class RecipeIngredient implements RecipeComponent{
 
 	public void setMeasurement(Measurement measurement) {
 		this.measurement = measurement;
+	}
+	
+	@Override
+	public RecipeIngredient clone(){
+		return new RecipeIngredient(ingredient, measurement);
 	}
 }

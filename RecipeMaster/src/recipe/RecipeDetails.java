@@ -10,9 +10,7 @@ import java.awt.Insets;
 public class RecipeDetails extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private Recipe recipe;
-	/**
-	 * Create the panel.
-	 */
+	
 	public RecipeDetails(Recipe recipe) {
 		this.recipe = recipe;
 		initialize();
@@ -42,10 +40,10 @@ public class RecipeDetails extends JPanel {
 		gbc_splitPane.gridy = 1;
 		add(splitPane, gbc_splitPane);
 		
-		RecipeIngredientList ingredientPanel = new RecipeIngredientList(recipe);
+		RecipeIngredientList ingredientPanel = new RecipeIngredientList(recipe.getIngredients());
 		splitPane.setLeftComponent(ingredientPanel);
 		
-		InstructionList instructionPanel = new InstructionList(recipe);
+		InstructionList instructionPanel = new InstructionList(recipe.getInstructions());
 		splitPane.setRightComponent(instructionPanel);
 	}
 }

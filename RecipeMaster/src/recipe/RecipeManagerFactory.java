@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -40,13 +41,13 @@ public class RecipeManagerFactory {
 
 
 class RecipeManagerImpl implements RecipeManager{
-	
+	/*
 	private final String workingDirectory = System.getProperty("user.home");
 	private final String resourceDirectory = "RecipeRoladex/resources";
-	/*
+	*/
 	private final String workingDirectory = System.getProperty("user.dir");
 	private final String resourceDirectory = "src/resources";
-	*/
+	
 	private final Path recipeDirectory = Paths.get(workingDirectory, resourceDirectory, "recipes");
 	
 	private static final String DELIMITER = ":";
@@ -129,6 +130,44 @@ class RecipeManagerImpl implements RecipeManager{
 		}
 	}
 	
+	@Override
+	public boolean saveRecipe(Recipe recipe){
+		try(BufferedWriter bw = Files.newBufferedWriter(Paths.get(recipeDirectory.toString(), recipe.getCategory(), recipe.getName() + RECIPE_FILENAME_SUFFIX + RECIPE_FILE_EXTENSION), CREATE, TRUNCATE_EXISTING)){
+			bw.write(recipe.getName() + "\n");
+			bw.write(INGREDIENTS + "\n");
+			for(RecipeIngredient recipeIngredient : recipe.getIngredients()){
+				bw.write(recipeIngredient.getMeasurement().getAmount() + DELIMITER + recipeIngredient.getMeasurement().getType().toString() + DELIMITER + recipeIngredient.getIngredient().getName() + "\n");
+			}
+			bw.write(STOP + "\n");
+			bw.write(INSTRUCTIONS + "\n");
+			for(Instruction instruction : recipe.getInstructions()){
+				bw.write(instruction.getStepNumber() + DELIMITER + instruction.getMessage() + "\n");
+			}
+			bw.write(STOP + "\n");
+			return true;
+		} catch (NoSuchFileException e){
+			newCategory(recipe.getCategory());
+			return saveRecipe(recipe);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean saveRecipes(Map<String, Collection<Recipe>> recipes){
+		boolean result = false;
+		do{
+			for(String category : recipes.keySet()){
+				for(Recipe recipe : recipes.get(category)){
+					result = saveRecipe(recipe);
+				}
+			}
+		}while(result);
+		return result;
+	}
+	
 	private Recipe createRecipe(Path path){
 		Recipe newRecipe = new Recipe();
 		try(BufferedReader bf = Files.newBufferedReader(path)){
@@ -192,7 +231,7 @@ class RecipeManagerImpl implements RecipeManager{
 		public RecipeIngredient call() throws Exception {
 			String[] parts = string.split(DELIMITER);
 			
-			Measurement measurement = new Measurement(Double.valueOf(parts[0]), Measurement.Type.valueOf(parts[1].toUpperCase()));
+			Measurement measurement = new Measurement(Double.valueOf(parts[0]), parts[1].toUpperCase());
 			Ingredient ingredient = new Ingredient();
 			ingredient.setName(parts[2]);
 			
