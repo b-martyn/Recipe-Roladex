@@ -23,6 +23,7 @@ import java.util.Set;
 public class RecipeTester {
 
 	public static void main(String[] args) throws Exception{
+		/*
 		Recipes recipes = new Recipes(RecipeManagerFactory.getRecipeManager());
 		Collection<Recipe> asdfRecipes =  recipes.getRecipes().get("ASDF");
 		Recipe recipe = asdfRecipes.toArray(new Recipe[asdfRecipes.size()])[0];
@@ -30,7 +31,7 @@ public class RecipeTester {
 		recipe.setCategory("BOB");
 		RecipeManagerFactory.getRecipeManager().saveRecipe(recipe);
 		System.out.println(recipe);
-		
+		*/
 		/*
 		Map<String, Collection<Recipe>> recipeList = recipes.getRecipes();
 		Collection<Recipe> asdfRecipes = recipeList.get("ASDF");
