@@ -22,7 +22,7 @@ import java.util.Set;
 public class MeasurementTypes implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	private Set<String> types;
+	private static Set<String> types;
 	private static MeasurementTypes instance = null;
 	private static File typesFile =  new File(util.Resources.RESOURCE_DIRECTORY.toString(), "MeasurementTypes.ser");
 	
@@ -38,21 +38,14 @@ public class MeasurementTypes implements Serializable {
 				    ObjectInput input = new ObjectInputStream (bufferIn)){
 				instance = (MeasurementTypes)input.readObject();
 				return instance;
-			} catch (FileNotFoundException e) {
+			} catch (FileNotFoundException | EOFException | ClassNotFoundException e) {
 				try {
 					return new MeasurementTypes();
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-			} catch (EOFException e) {
-				try {
-					instance = new MeasurementTypes();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			} catch (ClassNotFoundException | IOException e) {
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -64,23 +57,11 @@ public class MeasurementTypes implements Serializable {
 		return types;
 	}
 	
-	public void addType(String type){
-		if(types.add(type)){
-			try(OutputStream os = new FileOutputStream(typesFile);
-					OutputStream bufferOut = new BufferedOutputStream(os);
-					ObjectOutput output = new ObjectOutputStream(bufferOut)){
-				output.writeObject(instance);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-	
 	public boolean storeTypes(Set<String> types){
 		try(OutputStream os = new FileOutputStream(typesFile);
 				OutputStream bufferOut = new BufferedOutputStream(os);
 				ObjectOutput output = new ObjectOutputStream(bufferOut)){
+			MeasurementTypes.types = types;
 			output.writeObject(instance);
 			return true;
 		} catch (IOException e) {

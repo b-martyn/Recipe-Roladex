@@ -79,7 +79,7 @@ public class RecipeViewer extends JPanel implements ActionListener, PopupMenuLis
 			CategoryLoop:
 			for(String category : recipes.getRecipes().keySet()){
 				for(int i = 0; i < tabbedPane.getTabCount() - 1; i++){
-					if(tabbedPane.getTitleAt(i).equalsIgnoreCase(category)){
+					if(tabbedPane.getTitleAt(i).equals(category)){
 						continue CategoryLoop;
 					}
 				}
@@ -137,7 +137,7 @@ public class RecipeViewer extends JPanel implements ActionListener, PopupMenuLis
 	}
 	
 	private void newCategory(){
-		NewCategory newCategoryDialog = new NewCategory();
+		NewStringInput newCategoryDialog = new NewStringInput("New Category");
 		newCategoryDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		newCategoryDialog.addWindowListener(this);
 		newCategoryDialog.setVisible(true);
@@ -153,8 +153,10 @@ public class RecipeViewer extends JPanel implements ActionListener, PopupMenuLis
 				if(((RecipeEditor)eventObject.getSource()).getRecipe() != null && !((RecipeEditor)eventObject.getSource()).isCancelled()){
 					verifyRecipe(((RecipeEditor)eventObject.getSource()).getRecipe());
 				}
-			}else if(eventObject.getSource() instanceof NewCategory){
-				moveRecipe(getSelectedCategoryViewer().getList().getSelected(), ((NewCategory)eventObject.getSource()).getText());
+			}else if(eventObject.getSource() instanceof NewStringInput){
+				if(!((NewStringInput)eventObject.getSource()).isCancelled()){
+					moveRecipe(getSelectedCategoryViewer().getList().getSelected(), ((NewStringInput)eventObject.getSource()).getText());
+				}
 			}
 		}else if(eventObject instanceof ActionEvent){
 			ActionEvent actionEvent = (ActionEvent)eventObject;

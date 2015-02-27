@@ -63,6 +63,10 @@ public class RecipeIngredientList extends JPanel implements ListSelectionListene
 	public RecipeIngredient getSelectedIngredient(){
 		return selectedIngredient;
 	}
+	
+	public void addListSelectionListener(ListSelectionListener listSelectionListener){
+		list.addListSelectionListener(listSelectionListener);
+	}
 
 	@Override
 	public void valueChanged(ListSelectionEvent arg0) {

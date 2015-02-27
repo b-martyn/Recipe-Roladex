@@ -59,15 +59,17 @@ private static final long serialVersionUID = 1L;
 		}
 	}
 	
-	public Instruction getSelectedIngredient(){
+	public Instruction getSelectedInstruction(){
 		return selectedInstruction;
+	}
+	
+	public void addListSelectionListener(ListSelectionListener listSelectionListener){
+		list.addListSelectionListener(listSelectionListener);
 	}
 
 	@Override
 	public void valueChanged(ListSelectionEvent arg0) {
-		if(list.getSelectedValue() != null){
-			selectedInstruction = list.getSelectedValue();
-		}
+		selectedInstruction = list.getSelectedValue();
 	}
 	
 	public static class InstructionListRenderer implements ListCellRenderer<Instruction> {

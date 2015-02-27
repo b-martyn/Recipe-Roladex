@@ -1,6 +1,7 @@
 package recipe;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 
 import javax.swing.JButton;
@@ -15,14 +16,18 @@ import javax.swing.JTextField;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
-public class NewCategory extends JDialog {
+public class NewStringInput extends JDialog implements ActionListener, FocusListener{
 	private static final long serialVersionUID = 1L;
 	
 	private final JPanel contentPanel = new JPanel();
 	private JTextField textField;
+	private boolean cancelled = true;
 	
-	public NewCategory() {
+	public NewStringInput(String title) {
+		setTitle(title);
 		initialize();
 	}
 	
@@ -31,7 +36,6 @@ public class NewCategory extends JDialog {
 	}
 	
 	private void initialize(){
-		setTitle("New Category");
 		setBounds(100, 100, 257, 107);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -58,27 +62,54 @@ public class NewCategory extends JDialog {
 			{
 				JButton okButton = new JButton("OK");
 				okButton.setActionCommand("OK");
-				okButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						if(!textField.getText().isEmpty()){
-							firePropertyChange("newcategory", true, textField.getText());
-							dispose();
-						}
-					}
-				});
+				okButton.addActionListener(this);
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);
 			}
 			{
 				JButton cancelButton = new JButton("Cancel");
 				cancelButton.setActionCommand("Cancel");
-				cancelButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent arg0) {
-						dispose();
-					}
-				});
+				cancelButton.addActionListener(this);
 				buttonPane.add(cancelButton);
 			}
+		}
+	}
+	
+	public boolean isCancelled(){
+		return cancelled;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent actionEvent) {
+		switch(actionEvent.getActionCommand()){
+			case "OK":
+				verify();
+				break;
+			case "Cancel":
+				dispose();
+				break;
+		}
+	}
+
+	@Override
+	public void focusGained(FocusEvent focusEvent) {
+		textField.setText("");
+		textField.setForeground(Color.BLACK);
+	}
+
+	@Override
+	public void focusLost(FocusEvent arg0) {
+		// Do nothing
+	}
+	
+	private void verify(){
+		if(!textField.getText().isEmpty()){
+			cancelled = false;
+			dispose();
+		}else{
+			textField.setText("Enter in a value");
+			textField.setForeground(Color.RED);
+			textField.addFocusListener(this);
 		}
 	}
 }

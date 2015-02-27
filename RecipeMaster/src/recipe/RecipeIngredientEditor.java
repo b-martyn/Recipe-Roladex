@@ -13,6 +13,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,6 +24,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -27,7 +32,7 @@ import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class RecipeIngredientEditor extends JPanel implements ListSelectionListener, ActionListener, FocusListener{
+public class RecipeIngredientEditor extends JPanel implements ListSelectionListener, ActionListener, FocusListener, ItemListener, WindowListener{
 	private static final long serialVersionUID = 1L;
 	
 	private List<RecipeIngredient> ingredientList = new ArrayList<>();
@@ -66,7 +71,7 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 		
 		{
 			recipeIngredientList = new RecipeIngredientList(ingredientList);
-			
+			recipeIngredientList.addListSelectionListener(this);
 			GridBagConstraints gbc_recipeIngredientList = new GridBagConstraints();
 			gbc_recipeIngredientList.insets = new Insets(0, 0, 0, 0);
 			gbc_recipeIngredientList.fill = GridBagConstraints.BOTH;
@@ -83,50 +88,52 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 			gbl_inputPanel.rowWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
 			inputPanel.setLayout(gbl_inputPanel);
 			
+			JLabel lblAmount = new JLabel("Amount");
+			GridBagConstraints gbc_lblAmount = new GridBagConstraints();
+			gbc_lblAmount.insets = new Insets(0, 0, 5, 5);
+			gbc_lblAmount.gridx = 0;
+			gbc_lblAmount.gridy = 0;
+			inputPanel.add(lblAmount, gbc_lblAmount);
+			
 			txtFieldAmount = new JTextField();
 			GridBagConstraints gbc_textFieldAmount = new GridBagConstraints();
 			gbc_textFieldAmount.insets = new Insets(0, 0, 5, 5);
 			gbc_textFieldAmount.fill = GridBagConstraints.HORIZONTAL;
 			gbc_textFieldAmount.gridx = 0;
-			gbc_textFieldAmount.gridy = 0;
+			gbc_textFieldAmount.gridy = 1;
 			inputPanel.add(txtFieldAmount, gbc_textFieldAmount);
-			
-			JLabel lblAmount = new JLabel("Amount");
-			GridBagConstraints gbc_lblAmount = new GridBagConstraints();
-			gbc_lblAmount.insets = new Insets(0, 0, 5, 5);
-			gbc_lblAmount.gridx = 0;
-			gbc_lblAmount.gridy = 1;
-			inputPanel.add(lblAmount, gbc_lblAmount);
-			
-			comboBoxMeasurementType = new JComboBox<String>(MeasurementTypes.getInstance().getTypes().toArray(new String[MeasurementTypes.getInstance().getTypes().size()]));
-			GridBagConstraints gbc_comboBoxMeasurementType = new GridBagConstraints();
-			gbc_comboBoxMeasurementType.insets = new Insets(0, 0, 5, 5);
-			gbc_comboBoxMeasurementType.fill = GridBagConstraints.HORIZONTAL;
-			gbc_comboBoxMeasurementType.gridx = 1;
-			gbc_comboBoxMeasurementType.gridy = 0;
-			inputPanel.add(comboBoxMeasurementType, gbc_comboBoxMeasurementType);
 			
 			JLabel lblMeasurement = new JLabel("Measurement");
 			GridBagConstraints gbc_lblMeasurement = new GridBagConstraints();
 			gbc_lblMeasurement.insets = new Insets(0, 0, 5, 5);
 			gbc_lblMeasurement.gridx = 1;
-			gbc_lblMeasurement.gridy = 1;
+			gbc_lblMeasurement.gridy = 0;
 			inputPanel.add(lblMeasurement, gbc_lblMeasurement);
+			
+			comboBoxMeasurementType = new JComboBox<String>(MeasurementTypes.getInstance().getTypes().toArray(new String[MeasurementTypes.getInstance().getTypes().size()]));
+			comboBoxMeasurementType.addItem("New");
+			comboBoxMeasurementType.addItemListener(this);
+			GridBagConstraints gbc_comboBoxMeasurementType = new GridBagConstraints();
+			gbc_comboBoxMeasurementType.insets = new Insets(0, 0, 5, 5);
+			gbc_comboBoxMeasurementType.fill = GridBagConstraints.HORIZONTAL;
+			gbc_comboBoxMeasurementType.gridx = 1;
+			gbc_comboBoxMeasurementType.gridy = 1;
+			inputPanel.add(comboBoxMeasurementType, gbc_comboBoxMeasurementType);
+			
+			JLabel lblIngredient = new JLabel("Ingredient");
+			GridBagConstraints gbc_lblIngredient = new GridBagConstraints();
+			gbc_lblIngredient.insets = new Insets(0, 0, 5, 0);
+			gbc_lblIngredient.gridx = 2;
+			gbc_lblIngredient.gridy = 0;
+			inputPanel.add(lblIngredient, gbc_lblIngredient);
 			
 			txtFieldIngredient = new JTextField();
 			GridBagConstraints gbc_textFieldIngredient = new GridBagConstraints();
 			gbc_textFieldIngredient.insets = new Insets(0, 0, 5, 0);
 			gbc_textFieldIngredient.fill = GridBagConstraints.HORIZONTAL;
 			gbc_textFieldIngredient.gridx = 2;
-			gbc_textFieldIngredient.gridy = 0;
+			gbc_textFieldIngredient.gridy = 1;
 			inputPanel.add(txtFieldIngredient, gbc_textFieldIngredient);
-			
-			JLabel lblIngredient = new JLabel("Ingredient");
-			GridBagConstraints gbc_lblIngredient = new GridBagConstraints();
-			gbc_lblIngredient.insets = new Insets(0, 0, 5, 0);
-			gbc_lblIngredient.gridx = 2;
-			gbc_lblIngredient.gridy = 1;
-			inputPanel.add(lblIngredient, gbc_lblIngredient);
 			
 			GridBagConstraints gbc_inputPanel = new GridBagConstraints();
 			gbc_inputPanel.insets = new Insets(0, 0, 0, 0);
@@ -192,6 +199,10 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 		return ingredientList;
 	}
 	
+	public JComboBox<String> getComboBoxMeasurementType(){
+		return comboBoxMeasurementType;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void valueChanged(ListSelectionEvent listSelectionEvent) {
@@ -199,6 +210,36 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 			selectedIngredient = (RecipeIngredient)((JList<RecipeIngredient>)listSelectionEvent.getSource()).getSelectedValue();
 			btnEdit.setVisible(true);
 			btnDelete.setVisible(true);
+		}
+	}
+
+	@Override
+	public void focusGained(FocusEvent focusEvent) {
+		if(focusEvent.getSource() instanceof JTextField){
+			JTextField field = ((JTextField)focusEvent.getSource());
+			field.setForeground(Color.BLACK);
+			field.setText("");
+			field.removeFocusListener(this);
+		}else if(focusEvent.getSource() instanceof JComboBox){
+			comboBoxMeasurementType.setBorder(BorderFactory.createEmptyBorder());
+			comboBoxMeasurementType.removeFocusListener(this);
+		}
+	}
+
+	@Override
+	public void focusLost(FocusEvent arg0) {
+		// Do Nothing
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent itemEvent) {
+		if(itemEvent.getStateChange() == 1){
+			if(itemEvent.getItem().equals("New")){
+				NewStringInput newMeasurementTypeDialog = new NewStringInput("New Measurement Type");
+				newMeasurementTypeDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+				newMeasurementTypeDialog.addWindowListener(this);
+				newMeasurementTypeDialog.setVisible(true);
+			}
 		}
 	}
 	
@@ -293,20 +334,44 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 	}
 
 	@Override
-	public void focusGained(FocusEvent focusEvent) {
-		if(focusEvent.getSource() instanceof JTextField){
-			JTextField field = ((JTextField)focusEvent.getSource());
-			field.setForeground(Color.BLACK);
-			field.setText("");
-			field.removeFocusListener(this);
-		}else if(focusEvent.getSource() instanceof JComboBox){
-			comboBoxMeasurementType.setBorder(BorderFactory.createEmptyBorder());
-			comboBoxMeasurementType.removeFocusListener(this);
+	public void windowActivated(WindowEvent windowEvent) {
+		// Do Nothing
+	}
+
+	@Override
+	public void windowClosed(WindowEvent windowEvent) {
+		if(windowEvent.getSource() instanceof NewStringInput){
+			if(!((NewStringInput)windowEvent.getSource()).isCancelled()){
+				comboBoxMeasurementType.removeItemAt(comboBoxMeasurementType.getItemCount() - 1);
+				comboBoxMeasurementType.addItem(((NewStringInput)windowEvent.getSource()).getText());
+				comboBoxMeasurementType.addItem("New");
+				comboBoxMeasurementType.setSelectedItem(((NewStringInput)windowEvent.getSource()).getText());
+			}
 		}
 	}
 
 	@Override
-	public void focusLost(FocusEvent arg0) {
+	public void windowClosing(WindowEvent windowEvent) {
+		// Do Nothing
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent windowEvent) {
+		// Do Nothing
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent windowEvent) {
+		// Do Nothing
+	}
+
+	@Override
+	public void windowIconified(WindowEvent windowEvent) {
+		// Do Nothing
+	}
+
+	@Override
+	public void windowOpened(WindowEvent windowEvent) {
 		// Do Nothing
 	}
 }

@@ -1,19 +1,94 @@
 package recipe;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 public class RecipeTester {
 
-	public static void main(String[] args) {
-		int length = 4;
-		int[] myIntArray = new int[length + 1];
-		for(int i = 0; i < length; i++){
-			myIntArray[i] = 2;
+	public static void main(String[] args) throws Exception{
+		Recipes recipes = new Recipes(RecipeManagerFactory.getRecipeManager());
+		Collection<Recipe> asdfRecipes =  recipes.getRecipes().get("ASDF");
+		Recipe recipe = asdfRecipes.toArray(new Recipe[asdfRecipes.size()])[0];
+		System.out.println(recipe);
+		recipe.setCategory("BOB");
+		RecipeManagerFactory.getRecipeManager().saveRecipe(recipe);
+		System.out.println(recipe);
+		
+		/*
+		Map<String, Collection<Recipe>> recipeList = recipes.getRecipes();
+		Collection<Recipe> asdfRecipes = recipeList.get("ASDF");
+		asdfRecipes.add(new Recipe());
+		Recipe[] asdfRecipeArray = asdfRecipes.toArray(new Recipe[asdfRecipes.size()]);
+		Recipe recipe = asdfRecipeArray[0];
+		recipe.setName("Bob");
+		System.out.println(recipeList.get("ASDF").size());
+		*/
+	}
+	
+	/*
+	static void testSerialization() throws Exception{
+		MeasurementTypes types = new MeasurementTypes();
+		types.addType("one");
+		
+		for(String type : types.getTypes()){
+			System.out.println("Before: " + type);
 		}
-		System.out.print("\n");
-		for(int i = 0; i < myIntArray.length; i++){
-			System.out.print(myIntArray[i] + ":");
+		
+		try(OutputStream os = new FileOutputStream("test.ser");
+		OutputStream bufferOut = new BufferedOutputStream(os);
+		ObjectOutput output = new ObjectOutputStream(bufferOut)){
+			output.writeObject(types);
+		}
+		
+		try(InputStream is = new FileInputStream("test.ser");
+		InputStream bufferIn = new BufferedInputStream(is);
+	    ObjectInput input = new ObjectInputStream (bufferIn)){
+			MeasurementTypes types2 = (MeasurementTypes)input.readObject();
+		    for(String type : types2.getTypes()){
+				System.out.println("After: " + type);
+			}
+		}
+		
+		recipe.MeasurementTypes myTypes = recipe.MeasurementTypes.getInstance();
+		System.out.println(myTypes.getTypes().size());
+		if(myTypes != null){
+			for(String type : myTypes.getTypes()){
+				System.out.println(type);
+			}
 		}
 	}
 	
+	static class MeasurementTypes implements Serializable{
+		private static final long serialVersionUID = 1L;
+		
+		private List<String> types = new ArrayList<String>();
+		
+		public void addType(String string){
+			types.add(string);
+		}
+		
+		public List<String> getTypes(){
+			return types;
+		}
+	}
+	*/
 	/*
 	void recipeManagerImpTester(){
 		/*

@@ -14,6 +14,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.JButton;
@@ -187,7 +188,7 @@ public class RecipeEditor extends JDialog implements ActionListener, WindowListe
 	}
 	
 	private void newCategory(){
-		NewCategory newCategoryDialog = new NewCategory();
+		NewStringInput newCategoryDialog = new NewStringInput("New Category");
 		newCategoryDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		newCategoryDialog.addWindowListener(this);
 		newCategoryDialog.setVisible(true);
@@ -205,6 +206,14 @@ public class RecipeEditor extends JDialog implements ActionListener, WindowListe
 			recipe.setCategory(btnCategorySelect.getText());
 			recipe.setInstructions(instructionEditor.getInstructions());
 			cancelled = false;
+			//Update MeasurementTypes file if new measurementTypes exist
+			if(recipeIngredientEditor.getComboBoxMeasurementType().getItemCount() - 1 != MeasurementTypes.getInstance().getTypes().size()){
+				Set<String> measurementTypes = new HashSet<>();
+				for(int i = 0; i < recipeIngredientEditor.getComboBoxMeasurementType().getItemCount() - 1; i++){
+					measurementTypes.add(recipeIngredientEditor.getComboBoxMeasurementType().getItemAt(i));
+				}
+				MeasurementTypes.getInstance().storeTypes(measurementTypes);
+			}
 			dispose();
 		}
 	}
@@ -233,7 +242,13 @@ public class RecipeEditor extends JDialog implements ActionListener, WindowListe
 
 	@Override
 	public void windowClosed(WindowEvent windowEvent) {
-		btnCategorySelect.setText(((NewCategory)windowEvent.getSource()).getText());
+		if(windowEvent.getSource() instanceof NewStringInput){
+			if(!((NewStringInput)windowEvent.getSource()).isCancelled()){
+				btnCategorySelect.setText(((NewStringInput)windowEvent.getSource()).getText());
+			}
+		}else if(windowEvent.getSource() instanceof RecipeIngredientEditor){
+			System.out.println(((RecipeIngredientEditor)windowEvent.getSource()).getComboBoxMeasurementType().getItemCount());
+		}
 	}
 
 	@Override

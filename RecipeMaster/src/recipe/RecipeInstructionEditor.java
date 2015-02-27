@@ -18,24 +18,25 @@ import java.util.List;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class RecipeInstructionEditor extends JPanel implements ListSelectionListener, ActionListener{
+public class RecipeInstructionEditor extends JPanel implements ActionListener, ListSelectionListener{
 	private static final long serialVersionUID = 1L;
 	
-	private List<Instruction> instructionList = new ArrayList<>();
+	private List<Instruction> list = new ArrayList<>();
 	private Instruction selectedInstruction = null;
 	
 	private JTextArea txtAreaInstruction;
-	private JList<Instruction> list;
+	private JComboBox<Integer> comboBoxStepNumbers;
+	private InstructionList instructionsList;
 	private JButton btnAdd;
 	private JButton btnCancel;
 	private JButton btnEdit;
@@ -48,7 +49,7 @@ public class RecipeInstructionEditor extends JPanel implements ListSelectionList
 	
 	private void copyInstructions(Collection<Instruction> list){
 		for(Instruction instruction : list){
-			instructionList.add(instruction.clone());
+			this.list.add(instruction.clone());
 		}
 	}
 	
@@ -64,49 +65,44 @@ public class RecipeInstructionEditor extends JPanel implements ListSelectionList
 		setLayout(gbl);
 		
 		{
-			JPanel instructionListPanel = new JPanel();
-			GridBagLayout gbl_instructionListPanel = new GridBagLayout();
-			gbl_instructionListPanel.columnWidths = new int[]{0, 0};
-			gbl_instructionListPanel.rowHeights = new int[]{0, 0, 0};
-			gbl_instructionListPanel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-			gbl_instructionListPanel.rowWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-			instructionListPanel.setLayout(gbl_instructionListPanel);
-			
-			JScrollPane scrollPane = new JScrollPane();
-			GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-			gbc_scrollPane.fill = GridBagConstraints.BOTH;
-			gbc_scrollPane.gridx = 0;
-			gbc_scrollPane.gridy = 1;
-			instructionListPanel.add(scrollPane, gbc_scrollPane);
-			
-			list = new JList<>(instructionList.toArray(new Instruction[instructionList.size()]));
-			list.setCellRenderer(new InstructionListRenderer());
-			list.addListSelectionListener(this);
-			scrollPane.setViewportView(list);
-			
-			GridBagConstraints gbc_instructionListPanel = new GridBagConstraints();
-			gbc_instructionListPanel.insets = new Insets(0, 0, 0, 0);
-			gbc_instructionListPanel.fill = GridBagConstraints.BOTH;
-			gbc_instructionListPanel.gridx = 0;
-			gbc_instructionListPanel.gridy = 0;
-			add(instructionListPanel, gbc_instructionListPanel);
+			instructionsList = new InstructionList(list);
+			instructionsList.addListSelectionListener(this);
+			GridBagConstraints gbc_instructionsList = new GridBagConstraints();
+			gbc_instructionsList.insets = new Insets(0, 0, 0, 0);
+			gbc_instructionsList.fill = GridBagConstraints.BOTH;
+			gbc_instructionsList.gridx = 0;
+			gbc_instructionsList.gridy = 0;
+			add(instructionsList, gbc_instructionsList);
 		}
 		{
 			JPanel inputPanel = new JPanel();
 			GridBagLayout gbl_inputPanel = new GridBagLayout();
-			gbl_inputPanel.columnWidths = new int[]{0, 0};
+			gbl_inputPanel.columnWidths = new int[]{0, 0, 0};
 			gbl_inputPanel.rowHeights = new int[]{0, 0};
-			gbl_inputPanel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+			gbl_inputPanel.columnWeights = new double[]{0, 1.0, Double.MIN_VALUE};
 			gbl_inputPanel.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 			inputPanel.setLayout(gbl_inputPanel);
 			
+			Integer[] stepNumbers = new Integer[list.size() + 1];
+			for(int i = 0; i < stepNumbers.length;){
+				stepNumbers[i] = ++i;
+			}
+			comboBoxStepNumbers = new JComboBox<>(stepNumbers);
+			GridBagConstraints gbc_comboBoxStepNumbers = new GridBagConstraints();
+			gbc_comboBoxStepNumbers.insets = new Insets(0, 0, 5, 0);
+			gbc_comboBoxStepNumbers.fill = GridBagConstraints.HORIZONTAL;
+			gbc_comboBoxStepNumbers.gridx = 0;
+			gbc_comboBoxStepNumbers.gridy = 0;
+			inputPanel.add(comboBoxStepNumbers, gbc_comboBoxStepNumbers);
+			
 			txtAreaInstruction = new JTextArea();
+			txtAreaInstruction.setWrapStyleWord(true);
 			txtAreaInstruction.setLineWrap(true);
 			txtAreaInstruction.setBorder(new LineBorder(new Color(0, 0, 0)));
 			GridBagConstraints gbc_textAreaInstruction = new GridBagConstraints();
 			gbc_textAreaInstruction.insets = new Insets(0, 0, 5, 0);
 			gbc_textAreaInstruction.fill = GridBagConstraints.BOTH;
-			gbc_textAreaInstruction.gridx = 0;
+			gbc_textAreaInstruction.gridx = 1;
 			gbc_textAreaInstruction.gridy = 0;
 			inputPanel.add(txtAreaInstruction, gbc_textAreaInstruction);
 			
@@ -171,7 +167,7 @@ public class RecipeInstructionEditor extends JPanel implements ListSelectionList
 	}
 	
 	public Collection<Instruction> getInstructions(){
-		return instructionList;
+		return list;
 	}
 	
 	public class InstructionListRenderer implements ListCellRenderer<Instruction> {
@@ -187,12 +183,15 @@ public class RecipeInstructionEditor extends JPanel implements ListSelectionList
 			return renderer;
 		}
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	@Override
 	public void valueChanged(ListSelectionEvent listSelectionEvent) {
-		if(list.getSelectedValue() != null){
-			selectedInstruction = (Instruction)((JList<Instruction>)listSelectionEvent.getSource()).getSelectedValue();
+		selectionChange();
+	}
+	
+	private void selectionChange() {
+		if(instructionsList.getSelectedInstruction() != null){
+			selectedInstruction = instructionsList.getSelectedInstruction();
 			btnEdit.setVisible(true);
 			btnDelete.setVisible(true);
 		}
@@ -223,7 +222,7 @@ public class RecipeInstructionEditor extends JPanel implements ListSelectionList
 			if(selectedInstruction != null && !btnEdit.isVisible()){
 				selectedInstruction.setMessage(txtAreaInstruction.getText());
 			}else{
-				instructionList.add(new Instruction(instructionList.size() + 1, txtAreaInstruction.getText()));
+				list.add(new Instruction(list.size() + 1, txtAreaInstruction.getText()));
 			}
 		}
 		
@@ -231,6 +230,7 @@ public class RecipeInstructionEditor extends JPanel implements ListSelectionList
 	}
 	
 	private void editInstruction(){
+		comboBoxStepNumbers.setSelectedItem(selectedInstruction.getStepNumber());
 		txtAreaInstruction.setText(selectedInstruction.getMessage());
 		btnAdd.setText("OK");
 		btnEdit.setVisible(false);
@@ -239,17 +239,17 @@ public class RecipeInstructionEditor extends JPanel implements ListSelectionList
 	
 	private void resetPanel(){
 		selectedInstruction = null;
+		comboBoxStepNumbers.setSelectedIndex(list.size());
 		txtAreaInstruction.setText("");
 		btnAdd.setText("Add New");
-		list.clearSelection();
 		btnCancel.setVisible(false);
 		btnDelete.setVisible(false);
 		btnEdit.setVisible(false);
-		list.setListData(instructionList.toArray(new Instruction[instructionList.size()]));
+		instructionsList.reload();
 	}
 	
 	private void removeInstruction(){
-		instructionList.remove(selectedInstruction);
+		list.remove(selectedInstruction);
 		resetPanel();
 	}
 	
