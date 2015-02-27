@@ -32,15 +32,15 @@ import static java.nio.file.FileVisitResult.*;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
-public class RecipeManagerFactory {
-	public static RecipeManager getRecipeManager(){
-		return new RecipeManagerImpl();
+public class RecipesDAOFactory {
+	public static RecipesDAO getRecipeManager(){
+		return new RecipesDAOFilesImpl();
 	}
 }
 
 
 
-class RecipeManagerImpl implements RecipeManager{
+class RecipesDAOFilesImpl implements RecipesDAO{
 	/*
 	user.home
 	RecipeRoladex/resources

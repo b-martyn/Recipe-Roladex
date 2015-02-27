@@ -31,7 +31,7 @@ public class MainWindow implements WindowListener, ActionListener{
 	}
 	
 	private void initialize() {
-		frame = new RecipeViewer(new Recipes(RecipeManagerFactory.getRecipeManager().getRecipes()));
+		frame = new RecipeViewer(new Recipes(RecipesDAOFactory.getRecipeManager().getRecipes()));
 		frame.addWindowListener(this);
 		frame.addActionListener(this);
 		frame.setBounds(100, 100, 850, 500);
@@ -40,7 +40,7 @@ public class MainWindow implements WindowListener, ActionListener{
 	
 	private void save(){
 		System.out.println("Save");
-		//RecipeManagerFactory.getRecipeManager().saveRecipes(recipeViewer.getRecipes().getRecipes());
+		//RecipesDAOFactory.getRecipeManager().saveRecipes(recipeViewer.getRecipes().getRecipes());
 	}
 
 	@Override
