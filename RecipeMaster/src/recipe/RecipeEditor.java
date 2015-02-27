@@ -205,6 +205,7 @@ public class RecipeEditor extends JDialog implements ActionListener, WindowListe
 			recipe.setName(textFieldName.getText());
 			recipe.setCategory(btnCategorySelect.getText());
 			recipe.setInstructions(instructionEditor.getInstructions());
+			recipe.setIngredients(recipeIngredientEditor.getIngredients());
 			cancelled = false;
 			//Update MeasurementTypes file if new measurementTypes exist
 			if(recipeIngredientEditor.getComboBoxMeasurementType().getItemCount() - 1 != MeasurementTypes.getInstance().getTypes().size()){
