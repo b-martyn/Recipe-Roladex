@@ -2,7 +2,6 @@ package recipe;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,46 +20,50 @@ import java.util.Set;
 
 public class MeasurementTypes implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
-	private static Set<String> types;
+
+	private static Set<String> types = new HashSet<>();
 	private static MeasurementTypes instance = null;
-	private static File typesFile =  new File(util.Resources.RESOURCE_DIRECTORY.toString(), "MeasurementTypes.ser");
-	
-	private MeasurementTypes() throws IOException{
+	private static File typesFile = new File(
+			util.Resources.RESOURCE_DIRECTORY.toString(),
+			"MeasurementTypes.ser");
+
+	private MeasurementTypes() {
 		types = new HashSet<>();
-		Files.createFile(typesFile.toPath());
 	}
-	
-	public static MeasurementTypes getInstance(){
-		if(instance == null){
-			try(InputStream is = new FileInputStream(typesFile);
+
+	public static MeasurementTypes getInstance() {
+		if (instance == null) {
+			try (InputStream is = new FileInputStream(typesFile);
 					InputStream bufferIn = new BufferedInputStream(is);
-				    ObjectInput input = new ObjectInputStream (bufferIn)){
-				instance = (MeasurementTypes)input.readObject();
+					ObjectInput input = new ObjectInputStream(bufferIn)) {
+				instance = (MeasurementTypes) input.readObject();
 				return instance;
-			} catch (FileNotFoundException | EOFException | ClassNotFoundException e) {
+			}catch(FileNotFoundException e){
 				try {
-					return new MeasurementTypes();
+					Files.createFile(typesFile.toPath());
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					instance = new MeasurementTypes();
+					return instance;
 				}
+			}catch (ClassNotFoundException e) {
+				instance = new MeasurementTypes();
+				return instance;
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				instance = new MeasurementTypes();
+				return instance;
 			}
 		}
 		return instance;
 	}
-	
-	public Set<String> getTypes(){
+
+	public Set<String> getTypes() {
 		return types;
 	}
-	
-	public boolean storeTypes(Set<String> types){
-		try(OutputStream os = new FileOutputStream(typesFile);
+
+	public boolean storeTypes(Set<String> types) {
+		try (OutputStream os = new FileOutputStream(typesFile);
 				OutputStream bufferOut = new BufferedOutputStream(os);
-				ObjectOutput output = new ObjectOutputStream(bufferOut)){
+				ObjectOutput output = new ObjectOutputStream(bufferOut)) {
 			MeasurementTypes.types = types;
 			output.writeObject(instance);
 			return true;
