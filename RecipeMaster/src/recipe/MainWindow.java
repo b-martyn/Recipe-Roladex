@@ -3,12 +3,15 @@ package recipe;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
 
-public class MainWindow {
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
-	private JFrame frame;
+public class MainWindow implements WindowListener, ActionListener{
+
+	private RecipeViewer frame;
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -28,21 +31,59 @@ public class MainWindow {
 	}
 	
 	private void initialize() {
-		frame = new JFrame();
+		frame = new RecipeViewer(new Recipes(RecipeManagerFactory.getRecipeManager().getRecipes()));
+		frame.addWindowListener(this);
+		frame.addActionListener(this);
 		frame.setBounds(100, 100, 850, 500);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{0, 0};
-		gridBagLayout.rowHeights = new int[]{0, 0};
-		gridBagLayout.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{1.0, Double.MIN_VALUE};
-		frame.getContentPane().setLayout(gridBagLayout);
-		
-		RecipeViewer recipeView = new RecipeViewer(new Recipes(RecipeManagerFactory.getRecipeManager()));
-		GridBagConstraints gbc_recipeView = new GridBagConstraints();
-		gbc_recipeView.fill = GridBagConstraints.BOTH;
-		gbc_recipeView.gridx = 0;
-		gbc_recipeView.gridy = 0;
-		frame.getContentPane().add(recipeView, gbc_recipeView);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+	}
+	
+	private void save(){
+		System.out.println("Save");
+		//RecipeManagerFactory.getRecipeManager().saveRecipes(recipeViewer.getRecipes().getRecipes());
+	}
+
+	@Override
+	public void windowActivated(WindowEvent arg0) {
+		// Do Nothing
+	}
+
+	@Override
+	public void windowClosed(WindowEvent arg0) {
+		save();
+	}
+
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+		// Do Nothing
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent arg0) {
+		// Do Nothing
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent arg0) {
+		// Do Nothing
+	}
+
+	@Override
+	public void windowIconified(WindowEvent arg0) {
+		// Do Nothing
+	}
+
+	@Override
+	public void windowOpened(WindowEvent arg0) {
+		// Do Nothing
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent actionEvent) {
+		switch(actionEvent.getActionCommand()){
+			case "mnuFileSave":
+				save();
+				break;
+		}
 	}
 }

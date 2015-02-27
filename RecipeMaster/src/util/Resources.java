@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Resources {
-	public static final Path WORKING_DIRECTORY = Paths.get(System.getProperty("user.home"));
+	public static final Path WORKING_DIRECTORY = Paths.get(System.getProperty("user.dir"));
 	public static final Path RESOURCE_DIRECTORY = Paths.get(WORKING_DIRECTORY.toString(), "RecipeRoladex/resources");
 	public static final Path RECIPE_DIRECTORY = Paths.get(RESOURCE_DIRECTORY.toString(), "recipes");
 	public static final String DELIMITER = ":";

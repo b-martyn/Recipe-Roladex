@@ -65,6 +65,7 @@ public class CategoryViewer extends JPanel implements PropertyChangeListener{
 		switch(propertyChangeEvent.getPropertyName()){
 			case "selectedRecipeChange":
 				reloadDetails();
+				firePropertyChange(propertyChangeEvent.getPropertyName(), propertyChangeEvent.getOldValue(), propertyChangeEvent.getNewValue());
 				break;
 		}
 	}

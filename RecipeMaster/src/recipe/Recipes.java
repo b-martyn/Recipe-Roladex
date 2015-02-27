@@ -7,12 +7,10 @@ import java.util.Collection;
 import java.util.Map;
 
 public class Recipes implements PropertyChangeListener{
-	private static Map<String, Collection<Recipe>> recipes;
-	private static RecipeManager recipeManager;
+	private Map<String, Collection<Recipe>> recipes;
 	
-	public Recipes(RecipeManager recipeManager){
-		this.recipeManager = recipeManager;
-		recipes = recipeManager.getRecipes();
+	public Recipes(Map<String, Collection<Recipe>> recipes){
+		this.recipes = recipes;
 		for(String category : recipes.keySet()){
 			for(Recipe recipe : recipes.get(category)){
 				recipe.addPropertyChangeListener(this);
@@ -62,7 +60,6 @@ public class Recipes implements PropertyChangeListener{
 	}
 	
 	public void deleteRecipe(Recipe recipe, String category){
-		Collection<Recipe> categoryList = recipes.get(category);
-		categoryList.remove(recipe);
+		recipes.get(category).remove(recipe);
 	}
 }

@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -28,6 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+//import static util.Resources.*;
 import static java.nio.file.FileVisitResult.*;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
@@ -42,20 +42,23 @@ public class RecipeManagerFactory {
 
 class RecipeManagerImpl implements RecipeManager{
 	/*
-	private final String workingDirectory = System.getProperty("user.home");
-	private final String resourceDirectory = "RecipeRoladex/resources";
+	user.home
+	RecipeRoladex/resources
+	
+	user.dir
+	src/resources
 	*/
-	private final String workingDirectory = System.getProperty("user.dir");
-	private final String resourceDirectory = "src/resources";
 	
-	private final Path recipeDirectory = Paths.get(workingDirectory, resourceDirectory, "recipes");
+	public static final Path WORKING_DIRECTORY = Paths.get(System.getProperty("user.dir"));
+	public static final Path RESOURCE_DIRECTORY = Paths.get(WORKING_DIRECTORY.toString(), "src/resources");
+	public static final Path RECIPE_DIRECTORY = Paths.get(RESOURCE_DIRECTORY.toString(), "recipes");
+	public static final String DELIMITER = ":";
+	public static final String INGREDIENTS = "ingredients";
+	public static final String INSTRUCTIONS = "instructions";
+	public static final String STOP = "end";
+	public static final String RECIPE_FILE_EXTENSION = ".txt";
+	public static final String RECIPE_FILENAME_SUFFIX = "recipe";
 	
-	private static final String DELIMITER = ":";
-	private static final String INGREDIENTS = "ingredients";
-	private static final String INSTRUCTIONS = "instructions";
-	private static final String STOP = "end";
-	private static final String RECIPE_FILE_EXTENSION = ".txt";
-	private static final String RECIPE_FILENAME_SUFFIX = "recipe";
 	
 	@Override
 	public Map<String, Collection<Recipe>> getRecipes(){
@@ -63,7 +66,7 @@ class RecipeManagerImpl implements RecipeManager{
 		
 		Map<String, Collection<Recipe>> recipes = new HashMap<>();
 		try{
-			Files.walkFileTree(recipeDirectory, fileFinder);
+			Files.walkFileTree(RECIPE_DIRECTORY, fileFinder);
 			for(String category : fileFinder.recipeFiles.keySet()){
 				Collection<Recipe> recipeCategory = new ArrayList<>();
 				for(Path recipePath : fileFinder.recipeFiles.get(category)){
@@ -73,7 +76,7 @@ class RecipeManagerImpl implements RecipeManager{
 			}
 		} catch (NoSuchFileException e){
 			try {
-				Files.createDirectories(recipeDirectory);
+				Files.createDirectories(RECIPE_DIRECTORY);
 				return getRecipes();
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
@@ -86,45 +89,11 @@ class RecipeManagerImpl implements RecipeManager{
 		
 		return recipes;
 	}
-
-	@Override
-	public void addRecipe(Recipe recipe) {
-		try(BufferedWriter bw = Files.newBufferedWriter(Paths.get(recipeDirectory.toString(), recipe.getCategory(), recipe.getName() + RECIPE_FILENAME_SUFFIX + RECIPE_FILE_EXTENSION), CREATE, TRUNCATE_EXISTING)){
-			
-			bw.write(recipe.getName() + "\n");
-			bw.write(INGREDIENTS + "\n");
-			for(RecipeIngredient recipeIngredient : recipe.getIngredients()){
-				bw.write(recipeIngredient.getMeasurement().getAmount() + DELIMITER + recipeIngredient.getMeasurement().getType().toString() + DELIMITER + recipeIngredient.getIngredient().getName() + "\n");
-			}
-			bw.write(STOP + "\n");
-			bw.write(INSTRUCTIONS + "\n");
-			for(Instruction instruction : recipe.getInstructions()){
-				bw.write(instruction.getStepNumber() + DELIMITER + instruction.getMessage() + "\n");
-			}
-			bw.write(STOP + "\n");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	@Override
+	
 	public void deleteRecipe(Recipe recipe) {
 		try {
-			Files.delete(Paths.get(recipeDirectory.toString(), recipe.getCategory(), recipe.getName() + RECIPE_FILENAME_SUFFIX + RECIPE_FILE_EXTENSION));
+			Files.delete(Paths.get(RECIPE_DIRECTORY.toString(), recipe.getCategory(), recipe.getName() + RECIPE_FILENAME_SUFFIX + RECIPE_FILE_EXTENSION));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	@Override
-	public void newCategory(String category){
-		try {
-			Files.createDirectory(recipeDirectory.resolve(category));
-		} catch(FileAlreadyExistsException e) {
-			//Do nothing
-		}catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -132,7 +101,7 @@ class RecipeManagerImpl implements RecipeManager{
 	
 	@Override
 	public boolean saveRecipe(Recipe recipe){
-		try(BufferedWriter bw = Files.newBufferedWriter(Paths.get(recipeDirectory.toString(), recipe.getCategory(), recipe.getName() + RECIPE_FILENAME_SUFFIX + RECIPE_FILE_EXTENSION), CREATE, TRUNCATE_EXISTING)){
+		try(BufferedWriter bw = Files.newBufferedWriter(Paths.get(RECIPE_DIRECTORY.toString(), recipe.getCategory(), recipe.getName() + RECIPE_FILENAME_SUFFIX + RECIPE_FILE_EXTENSION), CREATE, TRUNCATE_EXISTING)){
 			bw.write(recipe.getName() + "\n");
 			bw.write(INGREDIENTS + "\n");
 			for(RecipeIngredient recipeIngredient : recipe.getIngredients()){
@@ -166,6 +135,17 @@ class RecipeManagerImpl implements RecipeManager{
 			}
 		}while(result);
 		return result;
+	}
+	
+	private void newCategory(String category){
+		try {
+			Files.createDirectory(RECIPE_DIRECTORY.resolve(category));
+		} catch(FileAlreadyExistsException e) {
+			//Do nothing
+		}catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private Recipe createRecipe(Path path){

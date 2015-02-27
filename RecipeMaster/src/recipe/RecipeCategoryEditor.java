@@ -14,6 +14,12 @@ public class RecipeCategoryEditor extends JPopupMenu{
 	private Set<String> categoryList;
 	private Recipe recipe;
 	
+	public RecipeCategoryEditor(Set<String> categoryList){
+		this.recipe = new Recipe();
+		this.categoryList = categoryList;
+		initialize();
+	}
+	
 	public RecipeCategoryEditor(Recipe recipe, Set<String> categoryList){
 		this.recipe = recipe;
 		this.categoryList = categoryList;
