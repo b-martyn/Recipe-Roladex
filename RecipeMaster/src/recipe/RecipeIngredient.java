@@ -29,4 +29,9 @@ public class RecipeIngredient implements RecipeComponent, Cloneable{
 	public RecipeIngredient clone(){
 		return new RecipeIngredient(ingredient, measurement);
 	}
+	
+	@Override
+	public String toString(){
+		return measurement.toString() + " of " + ingredient.toString();
+	}
 }

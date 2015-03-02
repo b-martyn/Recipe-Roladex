@@ -24,7 +24,7 @@ public class MeasurementTypes implements Serializable {
 	private static Set<String> types = new HashSet<>();
 	private static MeasurementTypes instance = null;
 	private static File typesFile = new File(
-			util.Resources.RESOURCE_DIRECTORY.toString(),
+			recipe.Resources.RESOURCE_DIRECTORY.toString(),
 			"MeasurementTypes.ser");
 
 	private MeasurementTypes() {

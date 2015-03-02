@@ -1,16 +1,9 @@
 package recipe;
 
 import java.awt.EventQueue;
-import java.awt.Toolkit;
-
 import javax.swing.JFrame;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-
-public class MainWindow implements WindowListener, ActionListener{
+public class MainWindow {
 
 	private RecipeViewer frame;
 	
@@ -31,61 +24,10 @@ public class MainWindow implements WindowListener, ActionListener{
 	}
 	
 	private void initialize() {
-		frame = new RecipeViewer(new Recipes(RecipesDAOFactory.getRecipeManager().getRecipes()));
-		frame.addWindowListener(this);
-		frame.addActionListener(this);
+		frame = new RecipeViewer(new RecipeManager(new RecipesDAOFilesImpl()));
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setBounds(100, 100, 850, 500);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setVisible(true);
-	}
-	
-	private void save(){
-		System.out.println("Save");
-		//RecipesDAOFactory.getRecipeManager().saveRecipes(recipeViewer.getRecipes().getRecipes());
-	}
-
-	@Override
-	public void windowActivated(WindowEvent arg0) {
-		// Do Nothing
-	}
-
-	@Override
-	public void windowClosed(WindowEvent arg0) {
-		save();
-	}
-
-	@Override
-	public void windowClosing(WindowEvent arg0) {
-		// Do Nothing
-	}
-
-	@Override
-	public void windowDeactivated(WindowEvent arg0) {
-		// Do Nothing
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent arg0) {
-		// Do Nothing
-	}
-
-	@Override
-	public void windowIconified(WindowEvent arg0) {
-		// Do Nothing
-	}
-
-	@Override
-	public void windowOpened(WindowEvent arg0) {
-		// Do Nothing
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent actionEvent) {
-		switch(actionEvent.getActionCommand()){
-			case "mnuFileSave":
-				save();
-				break;
-		}
 	}
 }

@@ -20,6 +20,6 @@ public class Measurement {
 
 	@Override
 	public String toString() {
-		return "Measurement:" + amount + ":" + type;
+		return amount + " " + type;
 	}
 }

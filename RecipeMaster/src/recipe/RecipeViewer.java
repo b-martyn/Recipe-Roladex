@@ -17,13 +17,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 public class RecipeViewer extends JFrame implements ActionListener, WindowListener, PropertyChangeListener, ChangeListener{
 	private static final long serialVersionUID = 1L;
 
-	private Recipes recipes;
+	private RecipeManager recipeManager;
 	
 	private JTabbedPane tabbedPane;
 	private JMenuBar menu;
@@ -31,12 +33,13 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 	private JMenuItem mnuFileDelete;
 	private JMenuItem mnuFilePrint;
 	
-	public RecipeViewer(Recipes recipes) {
-		this.recipes = recipes;
+	public RecipeViewer(RecipeManager recipeManager) {
+		this.recipeManager = recipeManager;
 		initialize();
 	}
 	
 	private void initialize(){
+		addWindowListener(this);
 		
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0};
@@ -90,73 +93,51 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 		
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addChangeListener(this);
+		if(recipeManager.getRecipes().isEmpty()){
+			WelcomeDialog welcome = new WelcomeDialog();
+			welcome.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			welcome.setAlwaysOnTop(true);
+			welcome.setVisible(true);
+			welcome.requestFocusInWindow();
+		}else{
+			reloadViewer();
+		}
 		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
 		gbc_tabbedPane.fill = GridBagConstraints.BOTH;
 		gbc_tabbedPane.gridx = 0;
 		gbc_tabbedPane.gridy = 1;
 		add(tabbedPane, gbc_tabbedPane);
-		
-		if(recipes.getRecipes().isEmpty()){
-			tabbedPane.addTab("Welcome", new WelcomeScreen());
-		}else{
-			for(String category : recipes.getRecipes().keySet()){
-				CategoryViewer categoryPanel = new CategoryViewer(category, recipes.getRecipes().get(category));
-				categoryPanel.addPropertyChangeListener(this);
-				tabbedPane.addTab(category, categoryPanel);
-			}
-		}
 	}
 	
-	public Recipes getRecipes(){
-		return recipes;
-	}
-	
-	public void addActionListener(ActionListener actionListener){
-		for(int i = 0; i < menu.getMenuCount(); i++){
-			//System.out.println(menu.getMenu(i));
-			for(int j = 0; j < menu.getMenu(i).getItemCount(); j++){
-				if(menu.getMenu(i).getItem(j) instanceof JMenuItem){
-					menu.getMenu(i).getItem(j).addActionListener(actionListener);
-				}
-			}
-		}
+	public RecipeManager getRecipes(){
+		return recipeManager;
 	}
 	
 	private CategoryViewer getSelectedCategoryViewer(){
-		if(tabbedPane.getComponent(tabbedPane.getSelectedIndex()) instanceof CategoryViewer){
+		if(tabbedPane.getTabCount() > 0 && tabbedPane.getSelectedIndex() != -1){
 			return (CategoryViewer)tabbedPane.getComponent(tabbedPane.getSelectedIndex());
 		}else{
 			return null;
 		}
 	}
 	
-	private void verifyRecipe(Recipe recipe){
-		if(recipes.getRecipes().keySet().size() != tabbedPane.getTabCount()){
-			CategoryLoop:
-			for(String category : recipes.getRecipes().keySet()){
-				for(int i = 0; i < tabbedPane.getTabCount() - 1; i++){
-					if(tabbedPane.getTitleAt(i).equals(category)){
-						continue CategoryLoop;
-					}
-				}
-				CategoryViewer newViewer = new CategoryViewer(category, recipes.getRecipes().get(category));
-				newViewer.addPropertyChangeListener(this);
-				tabbedPane.add(category, newViewer);
-			}
-		}else if(!recipes.getRecipes().get(recipe.getCategory()).contains(recipe)){
-			recipes.getRecipes().get(recipe.getCategory()).add(recipe);
+	private void reloadViewer(){
+		tabbedPane.removeAll();
+		for(String category : recipeManager.getRecipes().keySet()){
+			CategoryViewer categoryPanel = new CategoryViewer(category, recipeManager.getRecipes().get(category));
+			categoryPanel.addPropertyChangeListener(this);
+			tabbedPane.addTab(category, categoryPanel);
 		}
-		
 		reloadTabs();
 	}
 	
 	private void moveRecipe(Recipe recipe, String newCategory){
 		recipe.setCategory(newCategory);
-		verifyRecipe(recipe);
+		reloadViewer();
 	}
 	
 	private void newRecipe(){
-		RecipeEditor dialog = new RecipeEditor(recipes.getRecipes().keySet());
+		RecipeEditor dialog = new RecipeEditor(recipeManager.getRecipes().keySet());
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		dialog.addWindowListener(this);
 		dialog.setVisible(true);
@@ -164,7 +145,7 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 	
 	private void editRecipe (){
 		if(getSelectedCategoryViewer().getList().getSelected() != null){
-			RecipeEditor dialog = new RecipeEditor(recipes.getRecipes().keySet(), getSelectedCategoryViewer().getList().getSelected());
+			RecipeEditor dialog = new RecipeEditor(recipeManager.getRecipes().keySet(), getSelectedCategoryViewer().getList().getSelected());
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.addWindowListener(this);
 			dialog.setVisible(true);
@@ -173,8 +154,24 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 	
 	private void deleteRecipe(){
 		if(getSelectedCategoryViewer().getList().getSelected() != null){
-			recipes.deleteRecipe(getSelectedCategoryViewer().getList().getSelected(), getSelectedCategoryViewer().getCategory());
-			reloadTabs();
+			recipeManager.deleteRecipe(getSelectedCategoryViewer().getList().getSelected(), getSelectedCategoryViewer().getCategory());
+		}
+		reloadViewer();
+	}
+	
+	private void printRecipe(){
+		if(getSelectedCategoryViewer().getList().getSelected() != null){
+			PrinterJob job = PrinterJob.getPrinterJob();
+			job.setPrintable(getSelectedCategoryViewer().getList().getSelected());
+			if(job.printDialog()){
+				try {
+					System.out.println(getSelectedCategoryViewer().getList().getSelected());
+					job.print();
+				} catch (PrinterException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 	
@@ -198,9 +195,11 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 			if(getSelectedCategoryViewer().getList().getSelected() != null){
 				mnuFileEdit.setEnabled(true);
 				mnuFileDelete.setEnabled(true);
+				mnuFilePrint.setEnabled(true);
 			}else{
 				mnuFileEdit.setEnabled(false);
 				mnuFileDelete.setEnabled(false);
+				mnuFilePrint.setEnabled(true);
 			}
 		}
 	}
@@ -218,7 +217,10 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 				deleteRecipe();
 				break;
 			case "mnuFileSave":
-				//Do Nothing
+				recipeManager.save();
+				break;
+			case "mnuFilePrint":
+				printRecipe();
 				break;
 			case "mnuFileExit":
 				dispose();
@@ -245,12 +247,17 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 	public void windowClosed(WindowEvent windowEvent) {
 		if(windowEvent.getSource() instanceof RecipeEditor){
 			if(((RecipeEditor)windowEvent.getSource()).getRecipe() != null && !((RecipeEditor)windowEvent.getSource()).isCancelled()){
-				verifyRecipe(((RecipeEditor)windowEvent.getSource()).getRecipe());
+				if(((RecipeEditor)windowEvent.getSource()).isNewRecipe()){
+					recipeManager.newRecipe(((RecipeEditor)windowEvent.getSource()).getRecipe());
+				}
+				reloadViewer();
 			}
 		}else if(windowEvent.getSource() instanceof NewStringInput){
 			if(!((NewStringInput)windowEvent.getSource()).isCancelled()){
 				moveRecipe(getSelectedCategoryViewer().getList().getSelected(), ((NewStringInput)windowEvent.getSource()).getText());
 			}
+		}else if(windowEvent.getSource() instanceof RecipeViewer){
+			recipeManager.save();
 		}
 	}
 
@@ -302,14 +309,16 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 	@Override
 	public void stateChanged(ChangeEvent changeEvent) {
 		if(changeEvent.getSource() instanceof JTabbedPane){
-			checkSelectedRecipe();
+			if(((JTabbedPane)changeEvent.getSource()).getTabCount() > 0){
+				checkSelectedRecipe();
+			}
 		}
 	}
 	
 	@SuppressWarnings("unused")
 	private void printRecipes(){
-		for(String category : recipes.getRecipes().keySet()){
-			System.out.printf("Category:%s | Recipes:%d\n", category, recipes.getRecipes().get(category).size());
+		for(String category : recipeManager.getRecipes().keySet()){
+			System.out.printf("Category:%s | RecipeManager:%d\n", category, recipeManager.getRecipes().get(category).size());
 		}
 	}
 }

@@ -27,38 +27,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-//import static util.Resources.*;
+import static recipe.Resources.*;
 import static java.nio.file.FileVisitResult.*;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
-public class RecipesDAOFactory {
-	public static RecipesDAO getRecipeManager(){
-		return new RecipesDAOFilesImpl();
-	}
-}
-
-
-
-class RecipesDAOFilesImpl implements RecipesDAO{
-	/*
-	user.home
-	RecipeRoladex/resources
-	
-	user.dir
-	src/resources
-	*/
-	
-	public static final Path WORKING_DIRECTORY = Paths.get(System.getProperty("user.dir"));
-	public static final Path RESOURCE_DIRECTORY = Paths.get(WORKING_DIRECTORY.toString(), "src/resources");
-	public static final Path RECIPE_DIRECTORY = Paths.get(RESOURCE_DIRECTORY.toString(), "recipes");
-	public static final String DELIMITER = ":";
-	public static final String INGREDIENTS = "ingredients";
-	public static final String INSTRUCTIONS = "instructions";
-	public static final String STOP = "end";
-	public static final String RECIPE_FILE_EXTENSION = ".txt";
-	public static final String RECIPE_FILENAME_SUFFIX = "recipe";
-	
+public class RecipesDAOFilesImpl implements RecipesDAO{
 	
 	@Override
 	public Map<String, Collection<Recipe>> getRecipes(){
@@ -79,24 +53,24 @@ class RecipesDAOFilesImpl implements RecipesDAO{
 				Files.createDirectories(RECIPE_DIRECTORY);
 				return getRecipes();
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		} catch (IOException e){
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
 		return recipes;
 	}
 	
-	public void deleteRecipe(Recipe recipe) {
+	@Override
+	public boolean deleteRecipe(Recipe recipe, String category) {
 		try {
-			Files.delete(Paths.get(RECIPE_DIRECTORY.toString(), recipe.getCategory(), recipe.getName() + RECIPE_FILENAME_SUFFIX + RECIPE_FILE_EXTENSION));
+			Files.delete(Paths.get(RECIPE_DIRECTORY.toString(), category, recipe.getName() + RECIPE_FILENAME_SUFFIX + RECIPE_FILE_EXTENSION));
+			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return false;
 	}
 	
 	@Override
@@ -118,23 +92,18 @@ class RecipesDAOFilesImpl implements RecipesDAO{
 			newCategory(recipe.getCategory());
 			return saveRecipe(recipe);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
 	}
 	
 	@Override
-	public boolean saveRecipes(Map<String, Collection<Recipe>> recipes){
-		boolean result = false;
-		do{
-			for(String category : recipes.keySet()){
-				for(Recipe recipe : recipes.get(category)){
-					result = saveRecipe(recipe);
-				}
+	public void saveRecipes(Map<String, Collection<Recipe>> recipes){
+		for(String category : recipes.keySet()){
+			for(Recipe recipe : recipes.get(category)){
+				saveRecipe(recipe);
 			}
-		}while(result);
-		return result;
+		}
 	}
 	
 	private void newCategory(String category){
@@ -143,7 +112,6 @@ class RecipesDAOFilesImpl implements RecipesDAO{
 		} catch(FileAlreadyExistsException e) {
 			//Do nothing
 		}catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -188,13 +156,10 @@ class RecipesDAOFilesImpl implements RecipesDAO{
 			ingredientPool.shutdown();
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return newRecipe;

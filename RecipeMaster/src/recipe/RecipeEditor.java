@@ -38,12 +38,14 @@ public class RecipeEditor extends JDialog implements ActionListener, WindowListe
 	
 	private Recipe recipe;
 	private boolean cancelled = true;
+	private boolean newRecipe = false;
 	
 	public RecipeEditor(Set<String> categories) {
 		this.categories = categories;
 		recipe = new Recipe();
 		recipe.setIngredients(new ArrayList<RecipeIngredient>());
 		recipe.setInstructions(new ArrayList<Instruction>());
+		newRecipe = true;
 		initialize();
 	}
 	
@@ -63,8 +65,13 @@ public class RecipeEditor extends JDialog implements ActionListener, WindowListe
 		return cancelled;
 	}
 	
+	public boolean isNewRecipe(){
+		return newRecipe;
+	}
+	
 	private void initialize(){
 		setBounds(100, 100, 700, 450);
+		addWindowListener(this);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -165,27 +172,6 @@ public class RecipeEditor extends JDialog implements ActionListener, WindowListe
 			contentPanel.add(buttonPane, gbc_controlPanel);
 		}
 	}
-
-	@Override
-	public void actionPerformed(ActionEvent actionEvent) {
-		switch(actionEvent.getActionCommand()){
-			case "OK":
-				verify();
-				break;
-			case "Cancel":
-				dispose();
-				break;
-			case "btnCategorySelect":
-				selectRecipeCategory((Component)actionEvent.getSource());
-				break;
-			case "categoryselected":
-				btnCategorySelect.setText(((JMenuItem)actionEvent.getSource()).getText());
-				break;
-			case "newcategoryselected":
-				newCategory();
-				break;
-		}
-	}
 	
 	private void newCategory(){
 		NewStringInput newCategoryDialog = new NewStringInput("New Category");
@@ -207,14 +193,6 @@ public class RecipeEditor extends JDialog implements ActionListener, WindowListe
 			recipe.setInstructions(instructionEditor.getInstructions());
 			recipe.setIngredients(recipeIngredientEditor.getIngredients());
 			cancelled = false;
-			//Update MeasurementTypes file if new measurementTypes exist
-			if(recipeIngredientEditor.getComboBoxMeasurementType().getItemCount() - 1 != MeasurementTypes.getInstance().getTypes().size()){
-				Set<String> measurementTypes = new HashSet<>();
-				for(int i = 0; i < recipeIngredientEditor.getComboBoxMeasurementType().getItemCount() - 1; i++){
-					measurementTypes.add(recipeIngredientEditor.getComboBoxMeasurementType().getItemAt(i));
-				}
-				MeasurementTypes.getInstance().storeTypes(measurementTypes);
-			}
 			dispose();
 		}
 	}
@@ -235,6 +213,39 @@ public class RecipeEditor extends JDialog implements ActionListener, WindowListe
 		}
 		return isValid;
 	}
+	
+	private void updateMeasurementTypes(){
+		if(!cancelled){
+			if(recipeIngredientEditor.getComboBoxMeasurementType().getItemCount() - 1 != MeasurementTypes.getInstance().getTypes().size()){
+				Set<String> measurementTypes = new HashSet<>();
+				for(int i = 0; i < recipeIngredientEditor.getComboBoxMeasurementType().getItemCount() - 1; i++){
+					measurementTypes.add(recipeIngredientEditor.getComboBoxMeasurementType().getItemAt(i));
+				}
+				MeasurementTypes.getInstance().storeTypes(measurementTypes);
+			}
+		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent actionEvent) {
+		switch(actionEvent.getActionCommand()){
+			case "OK":
+				verify();
+				break;
+			case "Cancel":
+				dispose();
+				break;
+			case "btnCategorySelect":
+				selectRecipeCategory((Component)actionEvent.getSource());
+				break;
+			case "categoryselected":
+				btnCategorySelect.setText(((JMenuItem)actionEvent.getSource()).getText());
+				break;
+			case "newcategoryselected":
+				newCategory();
+				break;
+		}
+	}
 
 	@Override
 	public void windowActivated(WindowEvent windowEvent) {
@@ -247,8 +258,8 @@ public class RecipeEditor extends JDialog implements ActionListener, WindowListe
 			if(!((NewStringInput)windowEvent.getSource()).isCancelled()){
 				btnCategorySelect.setText(((NewStringInput)windowEvent.getSource()).getText());
 			}
-		}else if(windowEvent.getSource() instanceof RecipeIngredientEditor){
-			System.out.println(((RecipeIngredientEditor)windowEvent.getSource()).getComboBoxMeasurementType().getItemCount());
+		}else if(windowEvent.getSource() instanceof RecipeEditor){
+			updateMeasurementTypes();
 		}
 	}
 

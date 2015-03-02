@@ -2,7 +2,14 @@ package recipe;
 
 public class Ingredient {
 	private String name;
-
+	
+	public Ingredient(){
+	}
+	
+	public Ingredient(String name){
+		this.name = name;
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -13,6 +20,6 @@ public class Ingredient {
 
 	@Override
 	public String toString() {
-		return "Ingredient:" + name;
+		return name;
 	}
 }

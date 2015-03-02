@@ -13,8 +13,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
@@ -32,7 +30,7 @@ import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class RecipeIngredientEditor extends JPanel implements ListSelectionListener, ActionListener, FocusListener, ItemListener, WindowListener{
+public class RecipeIngredientEditor extends JPanel implements ListSelectionListener, ActionListener, FocusListener, WindowListener{
 	private static final long serialVersionUID = 1L;
 	
 	private List<RecipeIngredient> ingredientList = new ArrayList<>();
@@ -112,7 +110,8 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 			
 			comboBoxMeasurementType = new JComboBox<String>(MeasurementTypes.getInstance().getTypes().toArray(new String[MeasurementTypes.getInstance().getTypes().size()]));
 			comboBoxMeasurementType.addItem("New");
-			comboBoxMeasurementType.addItemListener(this);
+			/**/
+			comboBoxMeasurementType.addActionListener(this);
 			GridBagConstraints gbc_comboBoxMeasurementType = new GridBagConstraints();
 			gbc_comboBoxMeasurementType.insets = new Insets(0, 0, 5, 5);
 			gbc_comboBoxMeasurementType.fill = GridBagConstraints.HORIZONTAL;
@@ -203,67 +202,9 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 		return comboBoxMeasurementType;
 	}
 	
-	@SuppressWarnings("unchecked")
-	@Override
-	public void valueChanged(ListSelectionEvent listSelectionEvent) {
-		if(recipeIngredientList.getSelectedIngredient() != null){
-			selectedIngredient = (RecipeIngredient)((JList<RecipeIngredient>)listSelectionEvent.getSource()).getSelectedValue();
-			btnEdit.setVisible(true);
-			btnDelete.setVisible(true);
-		}
-	}
-
-	@Override
-	public void focusGained(FocusEvent focusEvent) {
-		if(focusEvent.getSource() instanceof JTextField){
-			JTextField field = ((JTextField)focusEvent.getSource());
-			field.setForeground(Color.BLACK);
-			field.setText("");
-			field.removeFocusListener(this);
-		}else if(focusEvent.getSource() instanceof JComboBox){
-			comboBoxMeasurementType.setBorder(BorderFactory.createEmptyBorder());
-			comboBoxMeasurementType.removeFocusListener(this);
-		}
-	}
-
-	@Override
-	public void focusLost(FocusEvent arg0) {
-		// Do Nothing
-	}
-
-	@Override
-	public void itemStateChanged(ItemEvent itemEvent) {
-		if(itemEvent.getStateChange() == 1){
-			if(itemEvent.getItem().equals("New")){
-				NewStringInput newMeasurementTypeDialog = new NewStringInput("New Measurement Type");
-				newMeasurementTypeDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-				newMeasurementTypeDialog.addWindowListener(this);
-				newMeasurementTypeDialog.setVisible(true);
-			}
-		}
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent actionEvent) {
-		switch(actionEvent.getActionCommand()){
-			case "btnAdd":
-				newIngredient();
-				break;
-			case "btnEdit":
-				editIngredient();
-				break;
-			case "btnCancel":
-				resetPanel();
-				break;
-			case "btnDelete":
-				removeIngredient();
-				break;
-			default:
-				break;
-		}
-	}
-	
 	private void newIngredient(){
+
+		
 		if(inputVerified()){
 			Ingredient ingredient = new Ingredient();
 			ingredient.setName(txtFieldIngredient.getText());
@@ -274,6 +215,7 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 			}else{
 				ingredientList.add(new RecipeIngredient(ingredient, measurement));
 			}
+			resetPanel();
 		}
 	}
 	
@@ -331,6 +273,70 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 			return true;
 		}
 		return false;
+	}
+	
+	private void newMeasurementType() {
+		NewStringInput newMeasurementTypeDialog = new NewStringInput("New Measurement Type");
+		newMeasurementTypeDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		newMeasurementTypeDialog.addWindowListener(this);
+		newMeasurementTypeDialog.setVisible(true);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void valueChanged(ListSelectionEvent listSelectionEvent) {
+		if(recipeIngredientList.getSelectedIngredient() != null){
+			selectedIngredient = (RecipeIngredient)((JList<RecipeIngredient>)listSelectionEvent.getSource()).getSelectedValue();
+			btnEdit.setVisible(true);
+			btnDelete.setVisible(true);
+		}
+	}
+
+	@Override
+	public void focusGained(FocusEvent focusEvent) {
+		if(focusEvent.getSource() instanceof JTextField){
+			JTextField field = ((JTextField)focusEvent.getSource());
+			field.setForeground(Color.BLACK);
+			field.setText("");
+			field.removeFocusListener(this);
+		}else if(focusEvent.getSource() instanceof JComboBox){
+			comboBoxMeasurementType.setBorder(BorderFactory.createEmptyBorder());
+			comboBoxMeasurementType.removeFocusListener(this);
+		}
+	}
+
+	@Override
+	public void focusLost(FocusEvent arg0) {
+		// Do Nothing
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void actionPerformed(ActionEvent actionEvent) {
+		switch(actionEvent.getActionCommand()){
+			case "btnAdd":
+				System.out.println(ingredientList.size());
+				newIngredient();
+				System.out.println(ingredientList.size());
+				break;
+			case "btnEdit":
+				editIngredient();
+				break;
+			case "btnCancel":
+				resetPanel();
+				break;
+			case "btnDelete":
+				removeIngredient();
+				break;
+			case "comboBoxChanged":
+				if(((JComboBox<String>)actionEvent.getSource()).getSelectedItem() != null && ((JComboBox<String>)actionEvent.getSource()).getSelectedItem().equals("New")){
+					newMeasurementType();
+				}
+				break;
+			default:
+				System.out.println("Missed ActionCommand: " + actionEvent.getActionCommand());
+				break;
+		}
 	}
 
 	@Override

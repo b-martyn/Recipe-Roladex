@@ -1,11 +1,16 @@
 package recipe;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collection;
 
 
-public class Recipe {
+public class Recipe implements Printable{
 	private String name;
 	private String category = "";
 	private Collection<RecipeIngredient> ingredients = new ArrayList<>();;
@@ -60,12 +65,34 @@ public class Recipe {
 
 	@Override
 	public String toString() {
-		return "Recipe\nname=" + name + "\nCategory=" + category
-				+ "\ningredients\n" + ingredients
-				+ ", instructions=" + instructions + "]";
+		StringBuilder sb = new StringBuilder(name + "\n" + category + "\n");
+		for(RecipeIngredient ingredient : ingredients){
+			sb.append(ingredient.toString() + "\n");
+		}
+		for(Instruction instruction : instructions){
+			sb.append(instruction.toString() + "\n");
+		}
+		return sb.toString();
 	}
 	
 	public void addPropertyChangeListener(PropertyChangeListener pcl){
 		pcs.addPropertyChangeListener(pcl);
+	}
+
+	@Override
+	public int print(Graphics graphics, PageFormat pageFormat, int pageNumber) throws PrinterException {
+		if(pageNumber > 0){
+			return NO_SUCH_PAGE;
+		}
+		
+		/* User (0,0) is typically outside the imageable area, so we must
+         * translate by the X and Y values in the PageFormat to avoid clipping
+         */
+        Graphics2D g2d = (Graphics2D)graphics;
+        g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+		
+		graphics.drawString("Hello Printer!", 50, 50);
+		
+		return PAGE_EXISTS;
 	}
 }

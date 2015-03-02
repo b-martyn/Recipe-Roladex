@@ -59,22 +59,22 @@ public class CategoryViewer extends JPanel implements PropertyChangeListener{
 	public Collection<Recipe> getRecipes(){
 		return recipes;
 	}
+	
+	public void reload(){
+		if(list.getSelected() != null){
+			splitPane.setRightComponent(new RecipeDetails(list.getSelected()));
+		}else{
+			splitPane.setRightComponent(new JPanel());
+		}
+	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
 		switch(propertyChangeEvent.getPropertyName()){
 			case "selectedRecipeChange":
-				reloadDetails();
+				reload();
 				firePropertyChange(propertyChangeEvent.getPropertyName(), propertyChangeEvent.getOldValue(), propertyChangeEvent.getNewValue());
 				break;
-		}
-	}
-	
-	private void reloadDetails(){
-		if(list.getSelected() != null){
-			splitPane.setRightComponent(new RecipeDetails(list.getSelected()));
-		}else{
-			splitPane.setRightComponent(new JPanel());
 		}
 	}
 }

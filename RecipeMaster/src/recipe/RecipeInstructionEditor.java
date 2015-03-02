@@ -12,9 +12,10 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Iterator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
@@ -31,7 +32,7 @@ import javax.swing.event.ListSelectionListener;
 public class RecipeInstructionEditor extends JPanel implements ActionListener, ListSelectionListener{
 	private static final long serialVersionUID = 1L;
 	
-	private List<Instruction> list = new ArrayList<>();
+	private SortedSet<Instruction> list = new TreeSet<>();
 	private Instruction selectedInstruction = null;
 	
 	private JTextArea txtAreaInstruction;
@@ -183,50 +184,31 @@ public class RecipeInstructionEditor extends JPanel implements ActionListener, L
 			return renderer;
 		}
 	}
-
-	@Override
-	public void valueChanged(ListSelectionEvent listSelectionEvent) {
-		selectionChange();
-	}
-	
-	private void selectionChange() {
-		if(instructionsList.getSelectedInstruction() != null){
-			selectedInstruction = instructionsList.getSelectedInstruction();
-			btnEdit.setVisible(true);
-			btnDelete.setVisible(true);
-		}
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent actionEvent) {
-		switch(actionEvent.getActionCommand()){
-			case "btnAdd":
-				newInstruction();
-				break;
-			case "btnEdit":
-				editInstruction();
-				break;
-			case "btnCancel":
-				resetPanel();
-				break;
-			case "btnDelete":
-				removeInstruction();
-				break;
-			default:
-				break;
-		}
-	}
 	
 	private void newInstruction(){
 		if(inputVerified()){
 			if(selectedInstruction != null && !btnEdit.isVisible()){
 				selectedInstruction.setMessage(txtAreaInstruction.getText());
 			}else{
-				list.add(new Instruction(list.size() + 1, txtAreaInstruction.getText()));
+				int stepNumber = comboBoxStepNumbers.getSelectedIndex() + 1;
+				//if the step number is not the next sequence in the list, move all the instructions 
+				//previous to the next one up and insert new instruction at correct place
+				if(stepNumber > list.size()){
+					list.add(new Instruction(stepNumber, txtAreaInstruction.getText()));
+				}else{
+					Iterator<Instruction> instructions = list.iterator();
+					while(instructions.hasNext()){
+						Instruction instruction = instructions.next();
+						if(instruction.getStepNumber() >= stepNumber){
+							instruction.setStepNumber(instruction.getStepNumber() + 1);
+						}
+					}
+					list.add(new Instruction(stepNumber, txtAreaInstruction.getText()));
+				}
 			}
+			comboBoxStepNumbers.addItem(list.size() + 1);
+			resetPanel();
 		}
-		
-		resetPanel();
 	}
 	
 	private void editInstruction(){
@@ -259,5 +241,34 @@ public class RecipeInstructionEditor extends JPanel implements ActionListener, L
 			result = false;
 		}
 		return result;
+	}
+
+	@Override
+	public void valueChanged(ListSelectionEvent listSelectionEvent) {
+		if(instructionsList.getSelectedInstruction() != null){
+			selectedInstruction = instructionsList.getSelectedInstruction();
+			btnEdit.setVisible(true);
+			btnDelete.setVisible(true);
+		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent actionEvent) {
+		switch(actionEvent.getActionCommand()){
+			case "btnAdd":
+				newInstruction();
+				break;
+			case "btnEdit":
+				editInstruction();
+				break;
+			case "btnCancel":
+				resetPanel();
+				break;
+			case "btnDelete":
+				removeInstruction();
+				break;
+			default:
+				break;
+		}
 	}
 }

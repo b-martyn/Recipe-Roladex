@@ -5,12 +5,16 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-public class Recipes implements PropertyChangeListener{
-	private Map<String, Collection<Recipe>> recipes;
+public class RecipeManager implements PropertyChangeListener{
+	private ConcurrentMap<String, Collection<Recipe>> recipes;
+	private RecipesDAO recipesDAO;
 	
-	public Recipes(Map<String, Collection<Recipe>> recipes){
-		this.recipes = recipes;
+	public RecipeManager(RecipesDAO recipesDAO){
+		this.recipesDAO = recipesDAO;
+		this.recipes = new ConcurrentHashMap<>(recipesDAO.getRecipes());
 		for(String category : recipes.keySet()){
 			for(Recipe recipe : recipes.get(category)){
 				recipe.addPropertyChangeListener(this);
@@ -47,6 +51,7 @@ public class Recipes implements PropertyChangeListener{
 	public void changeRecipeCategory(Recipe recipe, String oldCategory){
 		deleteRecipe(recipe, oldCategory);
 		newRecipe(recipe);
+		refresh();
 	}
 	
 	public void newRecipe(Recipe recipe){
@@ -57,9 +62,24 @@ public class Recipes implements PropertyChangeListener{
 			newCategoryList.add(recipe);
 			recipes.put(recipe.getCategory(), newCategoryList);
 		}
+		recipesDAO.saveRecipe(recipe);
 	}
 	
 	public void deleteRecipe(Recipe recipe, String category){
 		recipes.get(category).remove(recipe);
+		recipesDAO.deleteRecipe(recipe, category);
+		refresh();
+	}
+	
+	public void save(){
+		recipesDAO.saveRecipes(recipes);
+	}
+	
+	private void refresh(){
+		for(String category : recipes.keySet()){
+			if(recipes.get(category).isEmpty()){
+				recipes.remove(category);
+			}
+		}
 	}
 }
