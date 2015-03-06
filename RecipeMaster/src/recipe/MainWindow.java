@@ -1,7 +1,6 @@
 package recipe;
 
 import java.awt.EventQueue;
-import javax.swing.JFrame;
 
 public class MainWindow {
 
@@ -25,9 +24,6 @@ public class MainWindow {
 	
 	private void initialize() {
 		frame = new RecipeViewer(new RecipeManager(new RecipesDAOFilesImpl()));
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		frame.setBounds(100, 100, 850, 500);
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setVisible(true);
 	}
 }

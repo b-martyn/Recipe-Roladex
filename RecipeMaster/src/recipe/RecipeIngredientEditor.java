@@ -38,7 +38,7 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 	
 	private RecipeIngredientList recipeIngredientList;
 	private JTextField txtFieldAmount;
-	private JComboBox<String> comboBoxMeasurementType;
+	private JComboBox<MeasurementType> comboBoxMeasurementType;
 	private JTextField txtFieldIngredient;
 	private JButton btnAdd;
 	private JButton btnCancel;
@@ -108,9 +108,9 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 			gbc_lblMeasurement.gridy = 0;
 			inputPanel.add(lblMeasurement, gbc_lblMeasurement);
 			
-			comboBoxMeasurementType = new JComboBox<String>(MeasurementTypes.getInstance().getTypes().toArray(new String[MeasurementTypes.getInstance().getTypes().size()]));
-			comboBoxMeasurementType.addItem("New");
-			/**/
+			comboBoxMeasurementType = new JComboBox<MeasurementType>(MeasurementTypes.getMeasurementTypes().toArray(new MeasurementType[MeasurementTypes.getMeasurementTypes().size()]));
+			comboBoxMeasurementType.addItem(new MeasurementType("New"));
+			comboBoxMeasurementType.setRenderer(MeasurementType.getListCellRenderer());
 			comboBoxMeasurementType.addActionListener(this);
 			GridBagConstraints gbc_comboBoxMeasurementType = new GridBagConstraints();
 			gbc_comboBoxMeasurementType.insets = new Insets(0, 0, 5, 5);
@@ -198,7 +198,7 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 		return ingredientList;
 	}
 	
-	public JComboBox<String> getComboBoxMeasurementType(){
+	public JComboBox<MeasurementType> getComboBoxMeasurementType(){
 		return comboBoxMeasurementType;
 	}
 	
@@ -315,9 +315,7 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 	public void actionPerformed(ActionEvent actionEvent) {
 		switch(actionEvent.getActionCommand()){
 			case "btnAdd":
-				System.out.println(ingredientList.size());
 				newIngredient();
-				System.out.println(ingredientList.size());
 				break;
 			case "btnEdit":
 				editIngredient();
@@ -329,7 +327,8 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 				removeIngredient();
 				break;
 			case "comboBoxChanged":
-				if(((JComboBox<String>)actionEvent.getSource()).getSelectedItem() != null && ((JComboBox<String>)actionEvent.getSource()).getSelectedItem().equals("New")){
+				if(((JComboBox<MeasurementType>)actionEvent.getSource()).getSelectedItem() != null 
+					&& ((MeasurementType)((JComboBox<MeasurementType>)actionEvent.getSource()).getSelectedItem()).getName().equals("New")){
 					newMeasurementType();
 				}
 				break;
@@ -349,9 +348,10 @@ public class RecipeIngredientEditor extends JPanel implements ListSelectionListe
 		if(windowEvent.getSource() instanceof NewStringInput){
 			if(!((NewStringInput)windowEvent.getSource()).isCancelled()){
 				comboBoxMeasurementType.removeItemAt(comboBoxMeasurementType.getItemCount() - 1);
-				comboBoxMeasurementType.addItem(((NewStringInput)windowEvent.getSource()).getText());
-				comboBoxMeasurementType.addItem("New");
-				comboBoxMeasurementType.setSelectedItem(((NewStringInput)windowEvent.getSource()).getText());
+				MeasurementType newType = new MeasurementType(((NewStringInput)windowEvent.getSource()).getText());
+				comboBoxMeasurementType.addItem(newType);
+				comboBoxMeasurementType.addItem(new MeasurementType("New"));
+				comboBoxMeasurementType.setSelectedItem(newType);
 			}
 		}
 	}

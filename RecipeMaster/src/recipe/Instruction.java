@@ -35,7 +35,7 @@ public class Instruction implements Comparable<Instruction>, RecipeComponent, Cl
 
 	@Override
 	public String toString() {
-		return stepNumber + " : " + message;
+		return stepNumber + ": " + message;
 	}
 
 	@Override

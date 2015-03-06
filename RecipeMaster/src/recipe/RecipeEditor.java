@@ -216,13 +216,11 @@ public class RecipeEditor extends JDialog implements ActionListener, WindowListe
 	
 	private void updateMeasurementTypes(){
 		if(!cancelled){
-			if(recipeIngredientEditor.getComboBoxMeasurementType().getItemCount() - 1 != MeasurementTypes.getInstance().getTypes().size()){
-				Set<String> measurementTypes = new HashSet<>();
-				for(int i = 0; i < recipeIngredientEditor.getComboBoxMeasurementType().getItemCount() - 1; i++){
-					measurementTypes.add(recipeIngredientEditor.getComboBoxMeasurementType().getItemAt(i));
-				}
-				MeasurementTypes.getInstance().storeTypes(measurementTypes);
+			Set<MeasurementType> measurementTypes = new HashSet<>();
+			for(int i = 0; i < recipeIngredientEditor.getComboBoxMeasurementType().getItemCount() - 1; i++){
+				measurementTypes.add(recipeIngredientEditor.getComboBoxMeasurementType().getItemAt(i));
 			}
+			MeasurementTypes.storeTypes(measurementTypes);
 		}
 	}
 

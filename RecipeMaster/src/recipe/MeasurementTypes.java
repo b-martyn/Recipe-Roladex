@@ -15,60 +15,49 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.nio.file.Files;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class MeasurementTypes implements Serializable {
 	private static final long serialVersionUID = 1L;
-
-	private static Set<String> types = new HashSet<>();
-	private static MeasurementTypes instance = null;
-	private static File typesFile = new File(
-			recipe.Resources.RESOURCE_DIRECTORY.toString(),
-			"MeasurementTypes.ser");
-
-	private MeasurementTypes() {
-		types = new HashSet<>();
-	}
-
-	public static MeasurementTypes getInstance() {
-		if (instance == null) {
-			try (InputStream is = new FileInputStream(typesFile);
-					InputStream bufferIn = new BufferedInputStream(is);
-					ObjectInput input = new ObjectInputStream(bufferIn)) {
-				instance = (MeasurementTypes) input.readObject();
-				return instance;
-			}catch(FileNotFoundException e){
-				try {
-					Files.createFile(typesFile.toPath());
-				} catch (IOException e1) {
-					instance = new MeasurementTypes();
-					return instance;
-				}
-			}catch (ClassNotFoundException e) {
-				instance = new MeasurementTypes();
-				return instance;
-			} catch (IOException e) {
-				instance = new MeasurementTypes();
-				return instance;
+	
+	private static File typesFile = new File(recipe.Constants.FileConstants.RESOURCE_DIRECTORY.toString(), "MeasurementTypes.ser");
+	
+	public static Set<MeasurementType> getMeasurementTypes() {
+		SortedSet<MeasurementType> typeSet = new TreeSet<>();
+		try (InputStream is = new FileInputStream(typesFile);
+				InputStream bufferIn = new BufferedInputStream(is);
+				ObjectInput input = new ObjectInputStream(bufferIn)) {
+			MeasurementType type = null;
+			while((type = (MeasurementType)input.readObject()) != null){
+				typeSet.add(type);
 			}
+		}catch(FileNotFoundException e){
+			try {
+				Files.createFile(typesFile.toPath());
+			} catch (IOException e1) {
+				return typeSet;
+			}
+		}catch (ClassNotFoundException e) {
+			return typeSet;
+		} catch (IOException e) {
+			return typeSet;
 		}
-		return instance;
+		return typeSet;
 	}
-
-	public Set<String> getTypes() {
-		return types;
-	}
-
-	public boolean storeTypes(Set<String> types) {
+	
+	public static boolean storeTypes(Set<MeasurementType> types) {
 		try (OutputStream os = new FileOutputStream(typesFile);
 				OutputStream bufferOut = new BufferedOutputStream(os);
 				ObjectOutput output = new ObjectOutputStream(bufferOut)) {
-			MeasurementTypes.types = types;
-			output.writeObject(instance);
+			for(MeasurementType type : types){
+				output.writeObject(type);
+			}
 			return true;
 		} catch (IOException e) {
 			return false;
 		}
 	}
+	
 }
