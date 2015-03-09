@@ -167,8 +167,7 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 	private void printRecipe(){
 		if(getSelectedCategoryViewer().getList().getSelected() != null){
 			PrinterJob job = PrinterJob.getPrinterJob();
-			job.setPrintable(createRecipe(50, 50));
-			//job.setPrintable(getSelectedCategoryViewer().getList().getSelected());
+			job.setPrintable(getSelectedCategoryViewer().getList().getSelected());
 			if(job.printDialog()){
 				try {
 					job.print();
