@@ -167,7 +167,7 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 	private void printRecipe(){
 		if(getSelectedCategoryViewer().getList().getSelected() != null){
 			PrinterJob job = PrinterJob.getPrinterJob();
-			job.setPrintable(createRecipe(15, 15));
+			job.setPrintable(createRecipe(50, 50));
 			//job.setPrintable(getSelectedCategoryViewer().getList().getSelected());
 			if(job.printDialog()){
 				try {
@@ -195,7 +195,7 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 		newCategoryDialog.setVisible(true);
 	}
 	
-	private void checkSelectedRecipe(){
+	private void toggleRecipeControls(){
 		if(getSelectedCategoryViewer() != null){
 			if(getSelectedCategoryViewer().getList().getSelected() != null){
 				mnuFileEdit.setEnabled(true);
@@ -204,7 +204,7 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 			}else{
 				mnuFileEdit.setEnabled(false);
 				mnuFileDelete.setEnabled(false);
-				mnuFilePrint.setEnabled(true);
+				mnuFilePrint.setEnabled(false);
 			}
 		}
 	}
@@ -300,7 +300,7 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 	public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
 		switch(propertyChangeEvent.getPropertyName()){
 			case "selectedRecipeChange":
-				checkSelectedRecipe();
+				toggleRecipeControls();
 				break;
 			case "ancestor":
 				//Do Nothing
@@ -315,7 +315,7 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 	public void stateChanged(ChangeEvent changeEvent) {
 		if(changeEvent.getSource() instanceof JTabbedPane){
 			if(((JTabbedPane)changeEvent.getSource()).getTabCount() > 0){
-				checkSelectedRecipe();
+				toggleRecipeControls();
 			}
 		}
 	}

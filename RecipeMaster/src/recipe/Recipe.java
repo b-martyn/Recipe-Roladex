@@ -81,17 +81,19 @@ public class Recipe implements Printable{
 
 	@Override
 	public int print(Graphics graphics, PageFormat pageFormat, int pageNumber) throws PrinterException {
-		if(pageNumber > 0){
-			return NO_SUCH_PAGE;
-		}
-		
-		/* User (0,0) is typically outside the imageable area, so we must
+		/* 
+		 * User (0,0) is typically outside the imageable area, so we must
          * translate by the X and Y values in the PageFormat to avoid clipping
          */
+		
         Graphics2D g2d = (Graphics2D)graphics;
         g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
-		
-		graphics.drawString("Hello Printer!", 50, 50);
+        
+		RecipePrinter recipePrinter = new RecipePrinter(this, graphics, pageFormat);
+		if(pageNumber > recipePrinter.getNumOfPages() - 1){//pageNumber 0 based, numOfPages is not
+			return NO_SUCH_PAGE;
+		}
+		recipePrinter.renderPage(pageNumber);
 		
 		return PAGE_EXISTS;
 	}
