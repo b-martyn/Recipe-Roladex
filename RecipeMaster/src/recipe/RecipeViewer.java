@@ -21,8 +21,6 @@ import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.Collection;
 
 public class RecipeViewer extends JFrame implements ActionListener, WindowListener, PropertyChangeListener, ChangeListener{
 	private static final long serialVersionUID = 1L;
@@ -324,38 +322,5 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 		for(String category : recipeManager.getRecipes().keySet()){
 			System.out.printf("Category:%s | RecipeManager:%d\n", category, recipeManager.getRecipes().get(category).size());
 		}
-	}
-	
-	//@SuppressWarnings("unused")
-	private Recipe createRecipe(int numIngredients, int numInstructions){
-		Recipe recipe = new Recipe();
-		recipe.setName("Test Recipe");
-		recipe.setCategory("Test Category");
-		Collection<RecipeIngredient> ingredients = new ArrayList<>();
-		Collection<Instruction> instructions = new ArrayList<>();
-		for(int i = 0; i < numIngredients; i++){
-			
-			if(i == 10 || i == 20){
-				Ingredient ingredient = new Ingredient("This is a longer than normal ingredient that will take up more space");
-				Measurement measurement = new Measurement(i, "Type");
-				ingredients.add(new RecipeIngredient(ingredient, measurement));
-				continue;
-			}
-			
-			Ingredient ingredient = new Ingredient("Ingredient " + i);
-			Measurement measurement = new Measurement(i, "Type");
-			ingredients.add(new RecipeIngredient(ingredient, measurement));
-		}
-		recipe.setIngredients(ingredients);
-		for(int i = 0; i < numInstructions; i++){
-			if(i == 10 || i == 14){
-				instructions.add(new Instruction(i, "This is a long instruction that I am testing to see what happens when the length of an instruction lasts longer than the width of the graphics panel that it is being drawn on to.  This will help in the formatting of printing pages of recipes and does stuff and things and places.  In a galaxy far far away..."));
-			}else{
-				instructions.add(new Instruction(i, "Instruction " + i));
-			}
-		}
-		recipe.setInstructions(instructions);
-		
-		return recipe;
 	}
 }
