@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -13,7 +12,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import javax.swing.AbstractButton;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -26,7 +24,6 @@ public class DeleteableTabComponent extends JPanel {
 	private final JTabbedPane pane;
 	
 	public DeleteableTabComponent(JTabbedPane pane){
-		super(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		this.pane = pane;
 		setOpaque(false);
 		JLabel label = new TabTitleLabel();
@@ -52,7 +49,7 @@ public class DeleteableTabComponent extends JPanel {
 	private class TabButton extends JButton implements ActionListener, MouseListener{
 		private static final long serialVersionUID = 1L;
 		
-		private final int size = 17;
+		private final int size = 20;
 		
 		public TabButton(){
 			setPreferredSize(new Dimension(size, size));
@@ -60,10 +57,8 @@ public class DeleteableTabComponent extends JPanel {
 			setUI(new BasicButtonUI());
 			setContentAreaFilled(false);
 			setFocusable(false);
-			setBorder(BorderFactory.createEtchedBorder());
 			setBorderPainted(false);
 			addMouseListener(this);
-			setRolloverEnabled(true);
 			addActionListener(this);
 		}
 		
@@ -101,8 +96,7 @@ public class DeleteableTabComponent extends JPanel {
 
 		@Override
 		public void mouseClicked(MouseEvent mouseEvent) {
-			// TODO Auto-generated method stub
-			
+			// Do Nothing
 		}
 
 		@Override
@@ -125,14 +119,12 @@ public class DeleteableTabComponent extends JPanel {
 
 		@Override
 		public void mousePressed(MouseEvent mouseEvent) {
-			// TODO Auto-generated method stub
-			
+			// Do Nothing
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent mouseEvent) {
-			// TODO Auto-generated method stub
-			
+			// Do Nothing
 		}
 	}
 }
