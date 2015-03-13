@@ -117,7 +117,7 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 	
 	private CategoryViewer getSelectedCategoryViewer(){
 		if(tabbedPane.getTabCount() > 0 && tabbedPane.getSelectedIndex() != -1){
-			return (CategoryViewer)tabbedPane.getComponent(tabbedPane.getSelectedIndex());
+			return (CategoryViewer)tabbedPane.getComponentAt(tabbedPane.getSelectedIndex());
 		}else{
 			return null;
 		}
