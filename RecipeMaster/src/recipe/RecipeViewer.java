@@ -9,7 +9,6 @@ import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 import java.awt.Component;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -126,10 +125,13 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 	
 	private void reloadViewer(){
 		tabbedPane.removeAll();
+		int index = 0;
 		for(String category : recipeManager.getRecipes().keySet()){
 			CategoryViewer categoryPanel = new CategoryViewer(category, recipeManager.getRecipes().get(category));
 			categoryPanel.addPropertyChangeListener(this);
 			tabbedPane.addTab(category, categoryPanel);
+			tabbedPane.setTabComponentAt(index, new DeleteableTabComponent(tabbedPane));
+			index++;
 		}
 		reloadTabs();
 	}
@@ -164,6 +166,23 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 	
 	private void printRecipe(){
 		if(getSelectedCategoryViewer().getList().getSelected() != null){
+			Thread printingThread = new Thread(){
+				@Override
+				public void run(){
+					PrinterJob job = PrinterJob.getPrinterJob();
+					job.setPrintable(getSelectedCategoryViewer().getList().getSelected());
+					if(job.printDialog()){
+						try {
+							job.print();
+						} catch (PrinterException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			};
+			printingThread.start();
+			/*
 			PrinterJob job = PrinterJob.getPrinterJob();
 			job.setPrintable(getSelectedCategoryViewer().getList().getSelected());
 			if(job.printDialog()){
@@ -174,6 +193,7 @@ public class RecipeViewer extends JFrame implements ActionListener, WindowListen
 					e.printStackTrace();
 				}
 			}
+			*/
 		}
 	}
 	
