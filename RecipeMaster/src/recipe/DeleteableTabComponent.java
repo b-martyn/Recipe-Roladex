@@ -1,3 +1,8 @@
+/*
+ * Class was based off of Oracle Tutorial:
+ * http://docs.oracle.com/javase/tutorial/uiswing/examples/components/TabComponentsDemoProject/src/components/ButtonTabComponent.java
+ */
+
 package recipe;
 
 import java.awt.BasicStroke;
@@ -79,7 +84,7 @@ public class DeleteableTabComponent extends JPanel {
 			if(getModel().isRollover()){
 				graphics2D.setColor(Color.MAGENTA);
 			}
-			int delta = 6;
+			int delta = 7;
 			graphics2D.drawLine(delta, delta, getWidth() - delta - 1, getHeight() - delta - 1);
 			graphics2D.drawLine(getWidth() - delta - 1, delta, delta, getHeight() - delta - 1);
 			graphics2D.dispose();
@@ -88,7 +93,6 @@ public class DeleteableTabComponent extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent actionEvent) {
 			int i = pane.indexOfTabComponent(DeleteableTabComponent.this);
-			System.out.println(i);
 			if(i != -1){
 				pane.remove(i);
 			}

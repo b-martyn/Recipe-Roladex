@@ -3,14 +3,14 @@ package recipe;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.Collection;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
-public class CategoryViewer extends JPanel implements PropertyChangeListener{
+public class CategoryViewer extends JPanel implements ListSelectionListener{
 	private static final long serialVersionUID = 1L;
 
 	private Collection<Recipe> recipes;
@@ -35,7 +35,7 @@ public class CategoryViewer extends JPanel implements PropertyChangeListener{
 		splitPane = new JSplitPane();
 		
 		list = new RecipeList(recipes);
-		list.addPropertyChangeListener(this);
+		list.addListSelectionListener(this);
 		
 		splitPane.setLeftComponent(list);
 		splitPane.setRightComponent(new JPanel());
@@ -67,14 +67,13 @@ public class CategoryViewer extends JPanel implements PropertyChangeListener{
 			splitPane.setRightComponent(new JPanel());
 		}
 	}
+	
+	public Recipe getSelectedRecipe(){
+		return list.getSelected();
+	}
 
 	@Override
-	public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
-		switch(propertyChangeEvent.getPropertyName()){
-			case "selectedRecipeChange":
-				reload();
-				firePropertyChange(propertyChangeEvent.getPropertyName(), propertyChangeEvent.getOldValue(), propertyChangeEvent.getNewValue());
-				break;
-		}
+	public void valueChanged(ListSelectionEvent listSelectionEvent) {
+		reload();
 	}
 }

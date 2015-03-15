@@ -17,14 +17,12 @@ import java.util.Collection;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
 
-public class RecipeList extends JPanel implements ListSelectionListener{
+public class RecipeList extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
 	private Collection<Recipe> recipes;
 	private JList<Recipe> list;
-	private Recipe selectedRecipe;
 	
 	public RecipeList(Collection<Recipe> recipes) {
 		this.recipes = recipes;
@@ -49,37 +47,21 @@ public class RecipeList extends JPanel implements ListSelectionListener{
 		add(scrollPane, gbc_scrollPane);
 		
 		list = new JList<Recipe>(recipes.toArray(new Recipe[recipes.size()]));
-		list.addListSelectionListener(this);
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		list.setCellRenderer(new RecipeListRenderer());
 		scrollPane.setViewportView(list);
 	}
 	
-	public Collection<Recipe> getRecipes(){
-		return recipes;
-	}
-	
 	public Recipe getSelected(){
-		return selectedRecipe;
-	}
-	
-	public void setSelected(Recipe recipe){
-		if(recipes.contains(recipe)){
-			list.setSelectedValue(recipe, true);
-		}else{
-			throw new IllegalArgumentException("Recipe not found:\n" + recipe);
-		}
+		return list.getSelectedValue();
 	}
 	
 	public void reload(){
 		list.setListData(recipes.toArray(new Recipe[recipes.size()]));
 	}
-
-	@Override
-	public void valueChanged(ListSelectionEvent listSelectionEvent) {
-		Recipe oldValue = selectedRecipe;
-		selectedRecipe = list.getSelectedValue();
-		firePropertyChange("selectedRecipeChange", oldValue, selectedRecipe);
+	
+	public void addListSelectionListener(ListSelectionListener listSelectionListener){
+		list.addListSelectionListener(listSelectionListener);
 	}
 	
 	public static class RecipeListRenderer implements ListCellRenderer<Recipe> {

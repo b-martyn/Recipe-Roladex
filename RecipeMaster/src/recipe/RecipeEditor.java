@@ -187,7 +187,7 @@ public class RecipeEditor extends JDialog implements ActionListener, WindowListe
 	}
 	
 	private void verify(){
-		if(validateRecipe()){
+		if(areChangesValid()){
 			recipe.setName(textFieldName.getText());
 			recipe.setCategory(btnCategorySelect.getText());
 			recipe.setInstructions(instructionEditor.getInstructions());
@@ -197,7 +197,7 @@ public class RecipeEditor extends JDialog implements ActionListener, WindowListe
 		}
 	}
 	
-	private boolean validateRecipe(){
+	private boolean areChangesValid(){
 		boolean isValid = true;
 		
 		if(textFieldName.getText().isEmpty()){
